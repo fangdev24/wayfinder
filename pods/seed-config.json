@@ -1,0 +1,50 @@
+[
+  {
+    "name": "river-stone",
+    "email": "river.stone@citizen-support.demo.gov.example",
+    "password": "demo123",
+    "pods": [{ "name": "river-stone" }]
+  },
+  {
+    "name": "ash-morgan",
+    "email": "ash.morgan@revenue.demo.gov.example",
+    "password": "demo123",
+    "pods": [{ "name": "ash-morgan" }]
+  },
+  {
+    "name": "slate-wylder",
+    "email": "slate.wylder@identity.demo.gov.example",
+    "password": "demo123",
+    "pods": [{ "name": "slate-wylder" }]
+  },
+  {
+    "name": "flint-rivers",
+    "email": "flint.rivers@standards.demo.gov.example",
+    "password": "demo123",
+    "pods": [{ "name": "flint-rivers" }]
+  },
+  {
+    "name": "heath-willows",
+    "email": "heath.willows@health-data.demo.gov.example",
+    "password": "demo123",
+    "pods": [{ "name": "heath-willows" }]
+  },
+  {
+    "name": "puffin-team",
+    "email": "puffin@citizen-support.demo.gov.example",
+    "password": "demo123",
+    "pods": [{ "name": "puffin-team" }]
+  },
+  {
+    "name": "granite-team",
+    "email": "granite@standards.demo.gov.example",
+    "password": "demo123",
+    "pods": [{ "name": "granite-team" }]
+  },
+  {
+    "name": "wolf-team",
+    "email": "wolf@identity.demo.gov.example",
+    "password": "demo123",
+    "pods": [{ "name": "wolf-team" }]
+  }
+]

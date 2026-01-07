@@ -1,0 +1,63 @@
+@prefix foaf: <http://xmlns.com/foaf/0.1/> .
+@prefix vcard: <http://www.w3.org/2006/vcard/ns#> .
+@prefix schema: <http://schema.org/> .
+@prefix wayfinder: <https://wayfinder.demo.gov.example/ontology#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+# Wolf Identity Platform - BIA Team Pod
+#
+# This team provides identity verification services consumed across government.
+# Critical for cross-department identity integrations.
+
+<#team>
+    a foaf:Group, schema:Organization ;
+
+    # Team identity
+    foaf:name "Wolf Identity Platform" ;
+    wayfinder:teamId "wolf-identity" ;
+
+    # Parent organisation
+    vcard:organization-name "Border & Identity Agency" ;
+    wayfinder:departmentId "bia" ;
+
+    # Team description
+    schema:description "Provides identity verification and authentication services across government." ;
+
+    # Team members
+    foaf:member <http://localhost:3002/slate-wylder/profile#me> ;
+
+    # Responsibilities
+    wayfinder:responsibility "Identity verification" ;
+    wayfinder:responsibility "Document validation" ;
+    wayfinder:responsibility "Biometric matching" ;
+    wayfinder:responsibility "Identity proofing" ;
+
+    # Services maintained (cross-gov critical)
+    wayfinder:maintains <https://api.demo.gov.example/bia/identity/verify/v2> ;
+    wayfinder:maintains <https://api.demo.gov.example/bia/documents/v2> ;
+    wayfinder:maintains <https://api.demo.gov.example/bia/proofing/v1> ;
+
+    # Wayfinder service IDs
+    wayfinder:maintainsServiceId "identity-verification-api" ;
+    wayfinder:maintainsServiceId "document-check-service" ;
+    wayfinder:maintainsServiceId "id-proofing-service" ;
+
+    # Contact channels
+    vcard:email "wolf-identity@identity.demo.gov.example" ;
+    wayfinder:slackChannel "#wolf-identity" ;
+
+    # Documentation
+    wayfinder:documentation <https://docs.demo.gov.example/identity-verification/> ;
+    wayfinder:integrationGuide <https://docs.demo.gov.example/identity-integration/> ;
+
+    # Cross-department note
+    wayfinder:note "Contact for integrating identity verification into your service. DCS, VLA, and others already consume these APIs." ;
+
+    # Consumers of this team's services
+    wayfinder:consumedBy "dcs" ;
+    wayfinder:consumedBy "vla" ;
+    wayfinder:consumedBy "rts" ;
+
+    # Profile metadata
+    wayfinder:profileVersion "1.0" ;
+    wayfinder:lastUpdated "2026-03-11"^^xsd:date .

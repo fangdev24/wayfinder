@@ -1,0 +1,58 @@
+@prefix foaf: <http://xmlns.com/foaf/0.1/> .
+@prefix vcard: <http://www.w3.org/2006/vcard/ns#> .
+@prefix schema: <http://schema.org/> .
+@prefix wayfinder: <https://wayfinder.demo.gov.example/ontology#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+# Puffin Delivery Squad - DCS Team Pod
+#
+# This team profile is stored in DCS's Pod infrastructure.
+# Team membership is managed here, not in a central database.
+# Members link back to their personal Pods.
+
+<#team>
+    a foaf:Group, schema:Organization ;
+
+    # Team identity
+    foaf:name "Puffin Delivery Squad" ;
+    wayfinder:teamId "puffin-delivery" ;
+
+    # Parent organisation
+    vcard:organization-name "Department for Citizen Support" ;
+    wayfinder:departmentId "dcs" ;
+
+    # Team description
+    schema:description "Builds and runs citizen-facing benefit application services and eligibility checking." ;
+
+    # Team members (links to their personal Pods)
+    foaf:member <http://localhost:3002/river-stone/profile#me> ;
+    foaf:member <http://localhost:3002/hazel-brook/profile#me> ;
+
+    # Responsibilities
+    wayfinder:responsibility "Benefit applications" ;
+    wayfinder:responsibility "Eligibility rules engine" ;
+    wayfinder:responsibility "Citizen portal" ;
+    wayfinder:responsibility "Case management" ;
+
+    # Services maintained by this team
+    wayfinder:maintains <https://api.demo.gov.example/dcs/citizen-portal> ;
+    wayfinder:maintains <https://api.demo.gov.example/dcs/eligibility/v2> ;
+    wayfinder:maintains <https://api.demo.gov.example/dcs/applications/v1> ;
+    wayfinder:maintains <https://api.demo.gov.example/dcs/case-management> ;
+
+    # Wayfinder service IDs
+    wayfinder:maintainsServiceId "citizen-portal" ;
+    wayfinder:maintainsServiceId "eligibility-api" ;
+    wayfinder:maintainsServiceId "application-service" ;
+    wayfinder:maintainsServiceId "case-management" ;
+
+    # Contact channels
+    vcard:email "puffin-delivery@citizen-support.demo.gov.example" ;
+    wayfinder:slackChannel "#puffin-delivery" ;
+
+    # Documentation
+    wayfinder:documentation <https://docs.demo.gov.example/teams/puffin-delivery/> ;
+
+    # Profile metadata
+    wayfinder:profileVersion "1.0" ;
+    wayfinder:lastUpdated "2026-03-14"^^xsd:date .

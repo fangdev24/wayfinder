@@ -1,0 +1,52 @@
+@prefix foaf: <http://xmlns.com/foaf/0.1/> .
+@prefix vcard: <http://www.w3.org/2006/vcard/ns#> .
+@prefix schema: <http://schema.org/> .
+@prefix wayfinder: <https://wayfinder.demo.gov.example/ontology#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+# Ash Morgan - Principal Architect, RTS Falcon Core
+#
+# Profile owned by Ash, stored in RTS Pod infrastructure.
+# Demonstrates cross-department data sovereignty.
+
+<#me>
+    a foaf:Person, schema:Person ;
+
+    # Basic identity
+    foaf:name "Ash Morgan" ;
+    foaf:givenName "Ash" ;
+    foaf:familyName "Morgan" ;
+
+    # Organisation
+    vcard:organization-name "Revenue & Taxation Service" ;
+    wayfinder:departmentId "rts" ;
+    vcard:role "Principal Architect" ;
+
+    # Team membership
+    wayfinder:team <http://localhost:3002/falcon-team/profile#team> ;
+    wayfinder:teamId "falcon-core" ;
+
+    # Contact
+    vcard:email "ash.morgan@revenue.demo.gov.example" ;
+
+    # Technical skills
+    wayfinder:skill "Java" ;
+    wayfinder:skill "Domain Modeling" ;
+    wayfinder:skill "Tax Systems" ;
+    wayfinder:skill "Event Sourcing" ;
+
+    # Services maintained
+    wayfinder:maintains <https://api.demo.gov.example/rts/calculations/v3> ;
+    wayfinder:maintains <https://api.demo.gov.example/rts/assessment/v2> ;
+
+    # Wayfinder service IDs
+    wayfinder:maintainsServiceId "tax-calculation-engine" ;
+    wayfinder:maintainsServiceId "assessment-service" ;
+
+    # Pattern contributions
+    wayfinder:contributedTo "rules-engine" ;
+    wayfinder:contributedTo "audit-logging" ;
+
+    # Profile metadata
+    wayfinder:profileVersion "1.0" ;
+    wayfinder:lastUpdated "2026-03-08"^^xsd:date .

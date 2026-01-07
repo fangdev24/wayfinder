@@ -1,0 +1,61 @@
+@prefix foaf: <http://xmlns.com/foaf/0.1/> .
+@prefix vcard: <http://www.w3.org/2006/vcard/ns#> .
+@prefix schema: <http://schema.org/> .
+@prefix wayfinder: <https://wayfinder.demo.gov.example/ontology#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+# Granite Platform Team - DSO Team Pod
+#
+# This team maintains core shared infrastructure used across government.
+# Critical team for cross-department platform services.
+
+<#team>
+    a foaf:Group, schema:Organization ;
+
+    # Team identity
+    foaf:name "Granite Platform Team" ;
+    wayfinder:teamId "granite-platform" ;
+
+    # Parent organisation
+    vcard:organization-name "Digital Standards Office" ;
+    wayfinder:departmentId "dso" ;
+
+    # Team description
+    schema:description "Maintains core shared infrastructure including API gateway, service mesh, and hosting platform used across government." ;
+
+    # Team members (links to their personal Pods)
+    foaf:member <http://localhost:3002/flint-rivers/profile#me> ;
+    foaf:member <http://localhost:3002/brook-alder/profile#me> ;
+
+    # Responsibilities
+    wayfinder:responsibility "API Gateway management" ;
+    wayfinder:responsibility "Service mesh configuration" ;
+    wayfinder:responsibility "Cloud hosting platform" ;
+    wayfinder:responsibility "Infrastructure standards" ;
+
+    # Services maintained (foundational services)
+    wayfinder:maintains <https://gateway.demo.gov.example> ;
+    wayfinder:maintains <https://mesh.demo.gov.example> ;
+    wayfinder:maintains <https://cloud.demo.gov.example> ;
+    wayfinder:maintains <https://secrets.demo.gov.example> ;
+
+    # Wayfinder service IDs
+    wayfinder:maintainsServiceId "api-gateway" ;
+    wayfinder:maintainsServiceId "service-mesh" ;
+    wayfinder:maintainsServiceId "cloud-platform" ;
+    wayfinder:maintainsServiceId "secrets-manager" ;
+
+    # Contact channels
+    vcard:email "granite-platform@standards.demo.gov.example" ;
+    wayfinder:slackChannel "#granite-platform-support" ;
+
+    # Documentation
+    wayfinder:documentation <https://docs.demo.gov.example/api-gateway/> ;
+    wayfinder:onboardingGuide <https://docs.demo.gov.example/gateway-onboarding/> ;
+
+    # Cross-department note
+    wayfinder:note "Primary contact for departments onboarding to shared platform services." ;
+
+    # Profile metadata
+    wayfinder:profileVersion "1.0" ;
+    wayfinder:lastUpdated "2026-03-10"^^xsd:date .

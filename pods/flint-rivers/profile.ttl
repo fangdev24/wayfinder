@@ -1,0 +1,60 @@
+@prefix foaf: <http://xmlns.com/foaf/0.1/> .
+@prefix vcard: <http://www.w3.org/2006/vcard/ns#> .
+@prefix schema: <http://schema.org/> .
+@prefix wayfinder: <https://wayfinder.demo.gov.example/ontology#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+# Flint Rivers - Lead Platform Engineer, DSO Granite Platform
+#
+# Profile stored in DSO's Pod server.
+# Maintains the shared platform infrastructure used across government.
+
+<#me>
+    a foaf:Person, schema:Person ;
+
+    # Basic identity
+    foaf:name "Flint Rivers" ;
+    foaf:givenName "Flint" ;
+    foaf:familyName "Rivers" ;
+
+    # Organisation
+    vcard:organization-name "Digital Standards Office" ;
+    wayfinder:departmentId "dso" ;
+    vcard:role "Lead Platform Engineer" ;
+
+    # Team membership
+    wayfinder:team <http://localhost:3002/granite-team/profile#team> ;
+    wayfinder:teamId "granite-platform" ;
+
+    # Contact
+    vcard:email "flint.rivers@standards.demo.gov.example" ;
+
+    # Technical skills
+    wayfinder:skill "Kubernetes" ;
+    wayfinder:skill "Terraform" ;
+    wayfinder:skill "AWS" ;
+    wayfinder:skill "Go" ;
+    wayfinder:skill "Service Mesh" ;
+
+    # Services maintained (core shared infrastructure)
+    wayfinder:maintains <https://gateway.demo.gov.example> ;
+    wayfinder:maintains <https://mesh.demo.gov.example> ;
+    wayfinder:maintains <https://cloud.demo.gov.example> ;
+
+    # Wayfinder service IDs
+    wayfinder:maintainsServiceId "api-gateway" ;
+    wayfinder:maintainsServiceId "service-mesh" ;
+    wayfinder:maintainsServiceId "cloud-platform" ;
+
+    # Pattern contributions
+    wayfinder:contributedTo "api-gateway-pattern" ;
+    wayfinder:contributedTo "oauth2-client-credentials" ;
+    wayfinder:contributedTo "mtls-everywhere" ;
+    wayfinder:contributedTo "secrets-management" ;
+
+    # Cross-department note
+    wayfinder:note "Contact for onboarding services to the Government API Gateway." ;
+
+    # Profile metadata
+    wayfinder:profileVersion "1.0" ;
+    wayfinder:lastUpdated "2026-03-10"^^xsd:date .

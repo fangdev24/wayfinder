@@ -1,0 +1,57 @@
+@prefix foaf: <http://xmlns.com/foaf/0.1/> .
+@prefix vcard: <http://www.w3.org/2006/vcard/ns#> .
+@prefix schema: <http://schema.org/> .
+@prefix wayfinder: <https://wayfinder.demo.gov.example/ontology#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+# Slate Wylder - Identity Architect, BIA Wolf Identity
+#
+# Profile stored in BIA's Pod server.
+# Key person for cross-government identity services.
+
+<#me>
+    a foaf:Person, schema:Person ;
+
+    # Basic identity
+    foaf:name "Slate Wylder" ;
+    foaf:givenName "Slate" ;
+    foaf:familyName "Wylder" ;
+
+    # Organisation
+    vcard:organization-name "Border & Identity Agency" ;
+    wayfinder:departmentId "bia" ;
+    vcard:role "Identity Architect" ;
+
+    # Team membership
+    wayfinder:team <http://localhost:3002/wolf-team/profile#team> ;
+    wayfinder:teamId "wolf-identity" ;
+
+    # Contact
+    vcard:email "slate.wylder@identity.demo.gov.example" ;
+
+    # Technical skills
+    wayfinder:skill "Identity Standards" ;
+    wayfinder:skill "OAuth" ;
+    wayfinder:skill "OIDC" ;
+    wayfinder:skill "Biometrics" ;
+
+    # Services maintained (critical cross-gov service)
+    wayfinder:maintains <https://api.demo.gov.example/bia/identity/verify/v2> ;
+    wayfinder:maintains <https://api.demo.gov.example/bia/documents/v2> ;
+    wayfinder:maintains <https://api.demo.gov.example/bia/proofing/v1> ;
+
+    # Wayfinder service IDs
+    wayfinder:maintainsServiceId "identity-verification-api" ;
+    wayfinder:maintainsServiceId "document-check-service" ;
+    wayfinder:maintainsServiceId "id-proofing-service" ;
+
+    # Pattern contributions
+    wayfinder:contributedTo "identity-proofing" ;
+    wayfinder:contributedTo "data-minimisation" ;
+
+    # Cross-department note
+    wayfinder:note "Primary contact for departments integrating identity verification services." ;
+
+    # Profile metadata
+    wayfinder:profileVersion "1.0" ;
+    wayfinder:lastUpdated "2026-03-11"^^xsd:date .

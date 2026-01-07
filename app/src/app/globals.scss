@@ -1,0 +1,277 @@
+/**
+ * Wayfinder - GOV.UK Frontend Integration
+ *
+ * This imports the GOV.UK Design System styles and adds
+ * custom overrides for the Wayfinder demo.
+ */
+
+// GOV.UK Frontend settings (must come before importing govuk-frontend)
+$govuk-assets-path: '/assets/';
+$govuk-global-styles: true;
+$govuk-new-link-styles: true;
+
+// Import GOV.UK Frontend
+@import 'govuk-frontend/dist/govuk/all';
+
+// ============================================================================
+// CUSTOM WAYFINDER STYLES
+// ============================================================================
+
+// CSS Custom Properties for theming
+:root {
+  // Department colours (from our demo data)
+  --wayfinder-dso: #00703c;
+  --wayfinder-dcs: #1d70b8;
+  --wayfinder-rts: #912b88;
+  --wayfinder-bia: #d4351c;
+  --wayfinder-vla: #f47738;
+  --wayfinder-nhds: #005eb8;
+
+  // Graph visualisation
+  --graph-node-default: #1d70b8;
+  --graph-node-hover: #003078;
+  --graph-edge: #b1b4b6;
+  --graph-edge-highlight: #0b0c0c;
+
+  // Solid Pod indicator
+  --solid-pod-bg: #f3f2f1;
+  --solid-pod-border: #b1b4b6;
+}
+
+// ============================================================================
+// LAYOUT OVERRIDES
+// ============================================================================
+
+// Full-height layout for graph page
+.wayfinder-full-height {
+  min-height: calc(100vh - 200px);
+}
+
+// ============================================================================
+// GRAPH VISUALISATION CONTAINER
+// ============================================================================
+
+.wayfinder-graph {
+  width: 100%;
+  height: 600px;
+  border: 1px solid govuk-colour('mid-grey');
+  background: govuk-colour('white');
+  border-radius: 0;
+
+  // Native fullscreen mode styling
+  &:fullscreen {
+    width: 100vw;
+    height: 100vh;
+    border: none;
+  }
+
+  // Fallback for browsers using webkit prefix
+  &:-webkit-full-screen {
+    width: 100vw;
+    height: 100vh;
+    border: none;
+  }
+
+  // Animated edge flow effect - creates "data flowing" visual
+  .edge-animated {
+    stroke-dasharray: 8 4;
+    animation: edge-flow 0.8s linear infinite;
+  }
+
+  // Reverse direction for incoming edges
+  .edge-animated-reverse {
+    stroke-dasharray: 8 4;
+    animation: edge-flow-reverse 0.8s linear infinite;
+  }
+}
+
+// Flow animation keyframes - shifts dash pattern along the line
+@keyframes edge-flow {
+  from {
+    stroke-dashoffset: 12;
+  }
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+@keyframes edge-flow-reverse {
+  from {
+    stroke-dashoffset: 0;
+  }
+  to {
+    stroke-dashoffset: 12;
+  }
+}
+
+// ============================================================================
+// SEARCH INTERFACE
+// ============================================================================
+
+.wayfinder-search {
+  &__input {
+    @extend .govuk-input;
+    width: 100%;
+  }
+
+  &__results {
+    list-style: none;
+    padding: 0;
+    margin: govuk-spacing(4) 0 0 0;
+  }
+
+  &__result {
+    padding: govuk-spacing(3);
+    border-bottom: 1px solid govuk-colour('mid-grey');
+
+    &:last-child {
+      border-bottom: none;
+    }
+  }
+
+  &__highlight {
+    background-color: govuk-colour('yellow');
+    font-weight: bold;
+  }
+}
+
+// ============================================================================
+// CARDS (Service, Person, Team, Pattern)
+// ============================================================================
+
+.wayfinder-card {
+  background: govuk-colour('white');
+  border: 1px solid govuk-colour('mid-grey');
+  padding: govuk-spacing(4);
+  margin-bottom: govuk-spacing(4);
+
+  &__header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: govuk-spacing(2);
+  }
+
+  &__title {
+    @extend .govuk-heading-m;
+    margin-bottom: govuk-spacing(1);
+  }
+
+  &__subtitle {
+    @extend .govuk-body-s;
+    color: govuk-colour('dark-grey');
+  }
+
+  &__body {
+    @extend .govuk-body;
+  }
+
+  &__footer {
+    margin-top: govuk-spacing(3);
+    padding-top: govuk-spacing(3);
+    border-top: 1px solid govuk-colour('mid-grey');
+  }
+
+  // Department colour stripe
+  &--dso { border-left: 4px solid var(--wayfinder-dso); }
+  &--dcs { border-left: 4px solid var(--wayfinder-dcs); }
+  &--rts { border-left: 4px solid var(--wayfinder-rts); }
+  &--bia { border-left: 4px solid var(--wayfinder-bia); }
+  &--vla { border-left: 4px solid var(--wayfinder-vla); }
+  &--nhds { border-left: 4px solid var(--wayfinder-nhds); }
+}
+
+// ============================================================================
+// SOLID POD INDICATOR
+// ============================================================================
+
+.wayfinder-pod-indicator {
+  display: inline-flex;
+  align-items: center;
+  gap: govuk-spacing(1);
+  padding: govuk-spacing(1) govuk-spacing(2);
+  background: var(--solid-pod-bg);
+  border: 1px solid var(--solid-pod-border);
+  border-radius: 2px;
+  font-size: 14px;
+
+  &__icon {
+    width: 16px;
+    height: 16px;
+  }
+
+  &__text {
+    color: govuk-colour('dark-grey');
+  }
+}
+
+// ============================================================================
+// TAGS & BADGES
+// ============================================================================
+
+.wayfinder-tag {
+  @extend .govuk-tag;
+
+  &--api { background-color: var(--wayfinder-dcs); }
+  &--platform { background-color: var(--wayfinder-dso); }
+  &--library { background-color: govuk-colour('dark-grey'); }
+  &--event-stream { background-color: var(--wayfinder-rts); }
+
+  &--live { background-color: govuk-colour('green'); }
+  &--beta { background-color: govuk-colour('blue'); }
+  &--alpha { background-color: govuk-colour('orange'); }
+  &--deprecated { background-color: govuk-colour('red'); }
+}
+
+// ============================================================================
+// RELATIONSHIP BADGES
+// ============================================================================
+
+.wayfinder-relationship {
+  display: inline-flex;
+  align-items: center;
+  gap: govuk-spacing(1);
+  padding: govuk-spacing(1) govuk-spacing(2);
+  background: govuk-colour('light-grey');
+  font-size: 14px;
+  margin-right: govuk-spacing(2);
+  margin-bottom: govuk-spacing(2);
+
+  &--cross-department {
+    background: govuk-tint(govuk-colour('blue'), 90%);
+    border-left: 3px solid govuk-colour('blue');
+  }
+}
+
+// ============================================================================
+// UTILITY CLASSES
+// ============================================================================
+
+.wayfinder-visually-hidden {
+  @extend .govuk-visually-hidden;
+}
+
+.wayfinder-grid {
+  display: grid;
+  gap: govuk-spacing(4);
+
+  &--2-col {
+    grid-template-columns: repeat(2, 1fr);
+
+    @media (max-width: 640px) {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  &--3-col {
+    grid-template-columns: repeat(3, 1fr);
+
+    @media (max-width: 900px) {
+      grid-template-columns: repeat(2, 1fr);
+    }
+
+    @media (max-width: 640px) {
+      grid-template-columns: 1fr;
+    }
+  }
+}

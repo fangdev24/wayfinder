@@ -1,0 +1,33 @@
+{
+  "pods": {
+    "river-stone": {
+      "name": "River Stone",
+      "email": "river.stone@citizen-support.demo.gov.example"
+    },
+    "ash-morgan": {
+      "name": "Ash Morgan",
+      "email": "ash.morgan@revenue.demo.gov.example"
+    },
+    "slate-wylder": {
+      "name": "Slate Wylder",
+      "email": "slate.wylder@identity.demo.gov.example"
+    },
+    "flint-rivers": {
+      "name": "Flint Rivers",
+      "email": "flint.rivers@standards.demo.gov.example"
+    },
+    "heath-willows": {
+      "name": "Heath Willows",
+      "email": "heath.willows@health-data.demo.gov.example"
+    },
+    "puffin-team": {
+      "name": "Puffin Delivery Squad"
+    },
+    "granite-team": {
+      "name": "Granite Platform Team"
+    },
+    "wolf-team": {
+      "name": "Wolf Identity Platform"
+    }
+  }
+}

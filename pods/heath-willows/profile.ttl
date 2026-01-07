@@ -1,0 +1,57 @@
+@prefix foaf: <http://xmlns.com/foaf/0.1/> .
+@prefix vcard: <http://www.w3.org/2006/vcard/ns#> .
+@prefix schema: <http://schema.org/> .
+@prefix wayfinder: <https://wayfinder.demo.gov.example/ontology#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+# Heath Willows - Clinical Systems Lead, NHDS Oak Records
+#
+# Profile stored in NHDS's Pod server.
+# Maintains health data systems with strict privacy requirements.
+
+<#me>
+    a foaf:Person, schema:Person ;
+
+    # Basic identity
+    foaf:name "Heath Willows" ;
+    foaf:givenName "Heath" ;
+    foaf:familyName "Willows" ;
+
+    # Organisation
+    vcard:organization-name "National Health Data Service" ;
+    wayfinder:departmentId "nhds" ;
+    vcard:role "Clinical Systems Lead" ;
+
+    # Team membership
+    wayfinder:team <http://localhost:3002/oak-team/profile#team> ;
+    wayfinder:teamId "oak-records" ;
+
+    # Contact
+    vcard:email "heath.willows@health-data.demo.gov.example" ;
+
+    # Technical skills
+    wayfinder:skill "FHIR" ;
+    wayfinder:skill "HL7" ;
+    wayfinder:skill "Health Informatics" ;
+    wayfinder:skill "Java" ;
+
+    # Services maintained
+    wayfinder:maintains <https://api.demo.gov.example/nhds/scr/v2> ;
+    wayfinder:maintains <https://api.demo.gov.example/nhds/hie/v1> ;
+    wayfinder:maintains <https://api.demo.gov.example/nhds/pds/v2> ;
+
+    # Wayfinder service IDs
+    wayfinder:maintainsServiceId "summary-care-record-api" ;
+    wayfinder:maintainsServiceId "health-info-exchange" ;
+    wayfinder:maintainsServiceId "patient-demographics-api" ;
+
+    # Pattern contributions
+    wayfinder:contributedTo "fhir-resources" ;
+    wayfinder:contributedTo "consent-management" ;
+
+    # Cross-department note
+    wayfinder:note "Contact for health data integration patterns and FHIR guidance." ;
+
+    # Profile metadata
+    wayfinder:profileVersion "1.0" ;
+    wayfinder:lastUpdated "2026-03-11"^^xsd:date .

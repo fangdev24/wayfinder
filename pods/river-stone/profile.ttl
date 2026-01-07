@@ -1,0 +1,52 @@
+@prefix foaf: <http://xmlns.com/foaf/0.1/> .
+@prefix vcard: <http://www.w3.org/2006/vcard/ns#> .
+@prefix schema: <http://schema.org/> .
+@prefix wayfinder: <https://wayfinder.demo.gov.example/ontology#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+# River Stone - Lead Developer, DCS Puffin Team
+#
+# This profile is stored in River's personal Solid Pod.
+# The data is owned and controlled by River, not by Wayfinder.
+# Wayfinder links to this WebID but doesn't store this data centrally.
+
+<#me>
+    a foaf:Person, schema:Person ;
+
+    # Basic identity
+    foaf:name "River Stone" ;
+    foaf:givenName "River" ;
+    foaf:familyName "Stone" ;
+
+    # Organisation
+    vcard:organization-name "Department for Citizen Support" ;
+    wayfinder:departmentId "dcs" ;
+    vcard:role "Lead Developer" ;
+
+    # Team membership
+    wayfinder:team <http://localhost:3002/puffin-team/profile#team> ;
+    wayfinder:teamId "puffin-delivery" ;
+
+    # Contact
+    vcard:email "river.stone@citizen-support.demo.gov.example" ;
+
+    # Technical skills
+    wayfinder:skill "TypeScript" ;
+    wayfinder:skill "React" ;
+    wayfinder:skill "Node.js" ;
+    wayfinder:skill "PostgreSQL" ;
+    wayfinder:skill "GDS Patterns" ;
+
+    # Services maintained
+    wayfinder:maintains <https://api.demo.gov.example/dcs/citizen-portal> ;
+    wayfinder:maintains <https://api.demo.gov.example/dcs/eligibility/v2> ;
+    wayfinder:maintains <https://api.demo.gov.example/dcs/applications/v1> ;
+
+    # Wayfinder service IDs (for graph linking)
+    wayfinder:maintainsServiceId "citizen-portal" ;
+    wayfinder:maintainsServiceId "eligibility-api" ;
+    wayfinder:maintainsServiceId "application-service" ;
+
+    # Profile metadata
+    wayfinder:profileVersion "1.0" ;
+    wayfinder:lastUpdated "2026-03-10"^^xsd:date .
