@@ -1,14 +1,24 @@
 'use client';
 
-import { useState } from 'react';
+import { useGraphFilters } from './GraphContext';
 
 /**
- * GraphControls - Filters and controls for the knowledge graph
+ * GraphControls - Filters and layout controls for the knowledge graph
+ *
+ * Uses GraphContext to share filter/layout state with GraphCanvas
  */
 export function GraphControls() {
-  const [showServices, setShowServices] = useState(true);
-  const [showPatterns, setShowPatterns] = useState(true);
-  const [selectedDepartment, setSelectedDepartment] = useState('all');
+  const {
+    filters,
+    layout,
+    setShowServices,
+    setShowPatterns,
+    setSelectedDepartment,
+    setClumping,
+    setSpacing,
+    resetFilters,
+    resetLayout,
+  } = useGraphFilters();
 
   return (
     <div className="govuk-!-margin-bottom-6">
@@ -22,7 +32,7 @@ export function GraphControls() {
         <select
           className="govuk-select"
           id="department-filter"
-          value={selectedDepartment}
+          value={filters.selectedDepartment}
           onChange={(e) => setSelectedDepartment(e.target.value)}
         >
           <option value="all">All departments</option>
@@ -47,7 +57,7 @@ export function GraphControls() {
                 className="govuk-checkboxes__input"
                 id="show-services"
                 type="checkbox"
-                checked={showServices}
+                checked={filters.showServices}
                 onChange={(e) => setShowServices(e.target.checked)}
               />
               <label className="govuk-label govuk-checkboxes__label" htmlFor="show-services">
@@ -59,7 +69,7 @@ export function GraphControls() {
                 className="govuk-checkboxes__input"
                 id="show-patterns"
                 type="checkbox"
-                checked={showPatterns}
+                checked={filters.showPatterns}
                 onChange={(e) => setShowPatterns(e.target.checked)}
               />
               <label className="govuk-label govuk-checkboxes__label" htmlFor="show-patterns">
@@ -74,13 +84,69 @@ export function GraphControls() {
       <button
         type="button"
         className="govuk-button govuk-button--secondary"
-        onClick={() => {
-          setShowServices(true);
-          setShowPatterns(true);
-          setSelectedDepartment('all');
-        }}
+        onClick={resetFilters}
       >
         Reset filters
+      </button>
+
+      {/* Layout Controls */}
+      <h2 className="govuk-heading-s govuk-!-margin-top-6">Layout</h2>
+
+      {/* Clumping Slider */}
+      <div className="govuk-form-group">
+        <label className="govuk-label" htmlFor="clumping-slider">
+          Clumping
+        </label>
+        <p id="clumping-hint" className="govuk-hint" style={{ fontSize: '14px', marginBottom: '8px' }}>
+          Group similar nodes together
+        </p>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+          <span style={{ fontSize: '12px', color: '#505a5f' }}>Loose</span>
+          <input
+            type="range"
+            id="clumping-slider"
+            min="0"
+            max="100"
+            value={layout.clumping}
+            onChange={(e) => setClumping(parseInt(e.target.value, 10))}
+            style={{ flex: 1, cursor: 'pointer' }}
+            aria-describedby="clumping-hint"
+          />
+          <span style={{ fontSize: '12px', color: '#505a5f' }}>Tight</span>
+        </div>
+      </div>
+
+      {/* Spacing Slider */}
+      <div className="govuk-form-group">
+        <label className="govuk-label" htmlFor="spacing-slider">
+          Spacing
+        </label>
+        <p id="spacing-hint" className="govuk-hint" style={{ fontSize: '14px', marginBottom: '8px' }}>
+          Distance between clusters
+        </p>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+          <span style={{ fontSize: '12px', color: '#505a5f' }}>Dense</span>
+          <input
+            type="range"
+            id="spacing-slider"
+            min="0"
+            max="100"
+            value={layout.spacing}
+            onChange={(e) => setSpacing(parseInt(e.target.value, 10))}
+            style={{ flex: 1, cursor: 'pointer' }}
+            aria-describedby="spacing-hint"
+          />
+          <span style={{ fontSize: '12px', color: '#505a5f' }}>Spread</span>
+        </div>
+      </div>
+
+      {/* Reset Layout Button */}
+      <button
+        type="button"
+        className="govuk-button govuk-button--secondary"
+        onClick={resetLayout}
+      >
+        Reset layout
       </button>
     </div>
   );

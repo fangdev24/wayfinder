@@ -1,9 +1,10 @@
 'use client';
 
-import { useEffect, useRef, useState, useCallback } from 'react';
+import { useEffect, useRef, useState, useCallback, useMemo } from 'react';
 import * as d3 from 'd3';
 import { useRouter } from 'next/navigation';
 import { getGraphData, getServiceById, getPatternById, type GraphNode, type GraphEdge } from '@/lib/data';
+import { useGraphFilters } from './GraphContext';
 
 // Department colours matching the legend
 const DEPARTMENT_COLOURS: Record<string, string> = {
@@ -55,6 +56,44 @@ export function GraphCanvas() {
   selectedNodeRef.current = selectedNode;
 
   const router = useRouter();
+  const { filters, layout } = useGraphFilters();
+
+  // Calculate force strengths from layout sliders
+  // Clumping: 0 = no clustering, 100 = strong clustering toward group centers
+  // Spacing: 0 = dense/close, 100 = spread out
+  const clumpingStrength = layout.clumping / 100; // 0 to 1
+  const spacingStrength = -100 - (layout.spacing * 6); // -100 to -700
+
+  // Filter graph data based on current filters
+  const filteredData = useMemo(() => {
+    const { nodes: rawNodes, edges: rawEdges } = getGraphData();
+
+    // Filter nodes
+    const filteredNodes = rawNodes.filter(node => {
+      // Filter by node type
+      if (node.type === 'service' && !filters.showServices) return false;
+      if (node.type === 'pattern' && !filters.showPatterns) return false;
+
+      // Filter by department
+      if (filters.selectedDepartment !== 'all') {
+        // Patterns don't have departments, so show them if patterns are enabled
+        if (node.type === 'pattern') return true;
+        if (node.department !== filters.selectedDepartment) return false;
+      }
+
+      return true;
+    });
+
+    // Get set of visible node IDs for edge filtering
+    const visibleNodeIds = new Set(filteredNodes.map(n => n.id));
+
+    // Filter edges to only include those between visible nodes
+    const filteredEdges = rawEdges.filter(edge =>
+      visibleNodeIds.has(edge.source) && visibleNodeIds.has(edge.target)
+    );
+
+    return { nodes: filteredNodes, edges: filteredEdges };
+  }, [filters]);
 
   // Toggle native browser fullscreen
   const toggleFullscreen = useCallback(async () => {
@@ -124,11 +163,10 @@ export function GraphCanvas() {
     if (!containerRef.current) return;
 
     const container = containerRef.current;
-    const { nodes: rawNodes, edges: rawEdges } = getGraphData();
 
-    // Create mutable copies for D3
-    const nodes: SimNode[] = rawNodes.map(n => ({ ...n }));
-    const edges: SimEdge[] = rawEdges.map(e => ({
+    // Create mutable copies for D3 from filtered data
+    const nodes: SimNode[] = filteredData.nodes.map(n => ({ ...n }));
+    const edges: SimEdge[] = filteredData.edges.map(e => ({
       source: e.source,
       target: e.target,
       type: e.type,
@@ -179,17 +217,36 @@ export function GraphCanvas() {
       .attr('fill', d => d === 'implements' ? '#b1b4b6' : '#505a5f')
       .attr('d', 'M0,-5L10,0L0,5');
 
-    // Create force simulation
+    // Calculate cluster centers for each department (arranged in a circle)
+    const groups = ['dso', 'dcs', 'rts', 'bia', 'vla', 'nhds', 'patterns'];
+    const clusterCenters: Record<string, { x: number; y: number }> = {};
+    groups.forEach((group, i) => {
+      const angle = (i / groups.length) * 2 * Math.PI - Math.PI / 2;
+      const radius = Math.min(width, height) * 0.3;
+      clusterCenters[group] = {
+        x: width / 2 + Math.cos(angle) * radius,
+        y: height / 2 + Math.sin(angle) * radius,
+      };
+    });
+
+    // Create force simulation with configurable forces
     const simulation = d3.forceSimulation<SimNode>(nodes)
       .force('link', d3.forceLink<SimNode, SimEdge>(edges)
         .id(d => d.id)
-        .distance(100)
-        .strength(0.5))
-      .force('charge', d3.forceManyBody().strength(-200))
+        .distance(80)
+        .strength(0.4))
+      .force('charge', d3.forceManyBody().strength(spacingStrength))
       .force('center', d3.forceCenter(width / 2, height / 2))
-      .force('collision', d3.forceCollide().radius(30))
-      .force('x', d3.forceX(width / 2).strength(0.05))
-      .force('y', d3.forceY(height / 2).strength(0.05));
+      .force('collision', d3.forceCollide().radius(25))
+      // Clustering force: pull nodes toward their department's cluster center
+      .force('clusterX', d3.forceX<SimNode>(d => {
+        const center = clusterCenters[d.group || 'patterns'];
+        return center ? center.x : width / 2;
+      }).strength(clumpingStrength * 0.8))
+      .force('clusterY', d3.forceY<SimNode>(d => {
+        const center = clusterCenters[d.group || 'patterns'];
+        return center ? center.y : height / 2;
+      }).strength(clumpingStrength * 0.8));
 
     simulationRef.current = simulation;
 
@@ -366,7 +423,33 @@ export function GraphCanvas() {
       simulation.stop();
       svg.remove();
     };
-  }, [isFullscreen, router]); // Re-render when fullscreen changes (dimensions change)
+  }, [isFullscreen, router, filteredData]); // Re-render when fullscreen or filters change
+
+  // Update force strengths dynamically when layout sliders change
+  // This avoids rebuilding the whole graph - just updates physics
+  useEffect(() => {
+    const simulation = simulationRef.current;
+    if (!simulation) return;
+
+    // Update charge (spacing) force
+    const chargeForce = simulation.force('charge') as d3.ForceManyBody<SimNode> | undefined;
+    if (chargeForce) {
+      chargeForce.strength(spacingStrength);
+    }
+
+    // Update cluster forces (clumping)
+    const clusterXForce = simulation.force('clusterX') as d3.ForceX<SimNode> | undefined;
+    const clusterYForce = simulation.force('clusterY') as d3.ForceY<SimNode> | undefined;
+    if (clusterXForce) {
+      clusterXForce.strength(clumpingStrength * 0.8);
+    }
+    if (clusterYForce) {
+      clusterYForce.strength(clumpingStrength * 0.8);
+    }
+
+    // Reheat the simulation to apply changes
+    simulation.alpha(0.3).restart();
+  }, [clumpingStrength, spacingStrength]);
 
   // Get selected entity details
   const getSelectedDetails = () => {

@@ -84,14 +84,12 @@ export function ServiceCard({ service, compact = false, showFull = false }: Serv
       <div className="wayfinder-card__footer">
         <span className={`govuk-tag wayfinder-tag--${service.status}`}>{service.status}</span>
         {service.documentation && (
-          <a
-            href={service.documentation}
+          <Link
+            href="/docs"
             className="govuk-link govuk-!-margin-left-4"
-            target="_blank"
-            rel="noopener noreferrer"
           >
             Documentation
-          </a>
+          </Link>
         )}
       </div>
     </div>

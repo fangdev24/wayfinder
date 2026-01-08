@@ -91,10 +91,13 @@ export function AgentQueryInterface() {
   }>>([]);
 
   const inputRef = useRef<HTMLInputElement>(null);
-  const historyEndRef = useRef<HTMLDivElement>(null);
+  const chatContainerRef = useRef<HTMLDivElement>(null);
 
+  // Scroll to bottom of chat container (not the page) when history updates
   useEffect(() => {
-    historyEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    if (chatContainerRef.current) {
+      chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight;
+    }
   }, [history]);
 
   const handleSubmit = useCallback((e: React.FormEvent) => {
@@ -173,6 +176,7 @@ export function AgentQueryInterface() {
       </div>
 
       <div
+        ref={chatContainerRef}
         style={{
           border: '1px solid #b1b4b6',
           borderRadius: '0',
@@ -184,24 +188,10 @@ export function AgentQueryInterface() {
         }}
       >
         {history.length === 0 ? (
-          <div className="govuk-!-padding-4" style={{ color: '#505a5f' }}>
-            <p className="govuk-body-s govuk-!-margin-bottom-2">
-              <strong>Try asking:</strong>
+          <div className="govuk-!-padding-4" style={{ color: '#505a5f', display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '260px' }}>
+            <p className="govuk-body-s govuk-!-margin-bottom-0" style={{ textAlign: 'center' }}>
+              Use the example questions below, or type your own.
             </p>
-            <ul className="govuk-list govuk-body-s" style={{ marginBottom: 0 }}>
-              {exampleQueries.map((q, i) => (
-                <li key={i}>
-                  <button
-                    type="button"
-                    className="govuk-link"
-                    style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer', textDecoration: 'underline' }}
-                    onClick={() => handleSuggestionClick(q)}
-                  >
-                    {q}
-                  </button>
-                </li>
-              ))}
-            </ul>
           </div>
         ) : (
           <div className="govuk-!-padding-3">
@@ -298,7 +288,6 @@ export function AgentQueryInterface() {
               </div>
             )}
 
-            <div ref={historyEndRef} />
           </div>
         )}
       </div>
@@ -328,10 +317,34 @@ export function AgentQueryInterface() {
         </div>
       </form>
 
-      <div className="govuk-inset-text govuk-!-margin-top-4">
+      {/* Example Questions */}
+      <div className="govuk-!-margin-top-3 govuk-!-margin-bottom-4">
+        <p className="govuk-body-s govuk-!-margin-bottom-2" style={{ color: '#505a5f' }}>
+          <strong>Try asking:</strong>
+        </p>
+        <ul className="govuk-list govuk-body-s" style={{ marginBottom: 0 }}>
+          {exampleQueries.map((q, i) => (
+            <li key={i}>
+              <button
+                type="button"
+                className="govuk-link"
+                style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer', textDecoration: 'underline' }}
+                onClick={() => handleSuggestionClick(q)}
+              >
+                {q}
+              </button>
+            </li>
+          ))}
+        </ul>
+      </div>
+
+      <div className="govuk-inset-text govuk-!-margin-top-0">
         <p className="govuk-body-s govuk-!-margin-bottom-0">
           <strong>Also available in Slack:</strong> Message <code>@wayfinder</code> in any channel
           or use <code>/wayfinder</code> commands for quick lookups.
+        </p>
+        <p className="govuk-body-s govuk-!-margin-bottom-0 govuk-!-margin-top-2" style={{ color: '#505a5f' }}>
+          <em>Note: The Slack bot is only available in the internal demo workspace.</em>
         </p>
       </div>
     </div>

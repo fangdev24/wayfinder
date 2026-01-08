@@ -4,8 +4,8 @@
  * This module bridges the demo-data into the Next.js application.
  * It re-exports types and provides lookup functions for all entities.
  *
- * In production, this would be replaced with actual API calls.
- * For the demo, we use the static seed data.
+ * NOTE: This uses static data because it's imported by client components.
+ * The admin panel reads directly from SQLite via lib/admin/*.ts
  */
 
 // Import everything from demo-data
@@ -33,6 +33,19 @@ import {
   getMaintainersForService as _getMaintainersForService,
 } from '@/data-source';
 
+// Re-export data collections
+export {
+  demoDataset,
+  departments,
+  teams,
+  services,
+  patterns,
+  relationships,
+  people,
+  stats,
+  solidConfig,
+};
+
 // Re-export types
 export type {
   Department,
@@ -53,28 +66,31 @@ export type {
   SearchResult,
 } from '@/data-source/schema';
 
-// Re-export data collections
-export {
-  demoDataset,
-  departments,
-  teams,
-  services,
-  patterns,
-  relationships,
-  people,
-  stats,
-  solidConfig,
-};
-
 // ============================================================================
 // SERVICE HELPERS
 // ============================================================================
 
-export const getServiceById = _getServiceById;
-export const getServicesByDepartment = _getServicesByDepartment;
-export const getServicesByTeam = _getServicesByTeam;
-export const getConsumers = _getConsumers;
-export const getDependencies = _getDependencies;
+export function getServiceById(id: string) {
+  return services.find((s) => s.id === id);
+}
+
+export function getServicesByDepartment(departmentId: string) {
+  return services.filter((s) => s.departmentId === departmentId);
+}
+
+export function getServicesByTeam(teamId: string) {
+  return services.filter((s) => s.teamId === teamId);
+}
+
+export function getConsumers(serviceId: string) {
+  return services.filter((s) => s.dependsOn.includes(serviceId));
+}
+
+export function getDependencies(serviceId: string) {
+  const service = getServiceById(serviceId);
+  if (!service) return [];
+  return services.filter((s) => service.dependsOn.includes(s.id));
+}
 
 // ============================================================================
 // PEOPLE HELPERS

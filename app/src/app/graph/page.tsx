@@ -1,7 +1,4 @@
-import { Suspense } from 'react';
-import { GraphCanvas } from '@/components/graph/GraphCanvas';
-import { GraphControls } from '@/components/graph/GraphControls';
-import { GraphLegend } from '@/components/graph/GraphLegend';
+import { GraphPageContent } from '@/components/graph/GraphPageContent';
 
 export const metadata = {
   title: 'Knowledge Graph - Wayfinder',
@@ -21,24 +18,7 @@ export default function GraphPage() {
         </div>
       </div>
 
-      <div className="govuk-grid-row govuk-!-margin-top-4">
-        <div className="govuk-grid-column-one-quarter">
-          <GraphControls />
-          <GraphLegend />
-        </div>
-
-        <div className="govuk-grid-column-three-quarters">
-          <Suspense
-            fallback={
-              <div className="wayfinder-graph" aria-busy="true">
-                <p className="govuk-body govuk-!-padding-4">Loading graph...</p>
-              </div>
-            }
-          >
-            <GraphCanvas />
-          </Suspense>
-        </div>
-      </div>
+      <GraphPageContent />
 
       <div className="govuk-grid-row govuk-!-margin-top-6">
         <div className="govuk-grid-column-two-thirds">

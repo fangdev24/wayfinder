@@ -11,7 +11,7 @@ $govuk-global-styles: true;
 $govuk-new-link-styles: true;
 
 // Import GOV.UK Frontend
-@import 'govuk-frontend/dist/govuk/all';
+@import 'govuk-frontend/dist/govuk/index';
 
 // ============================================================================
 // CUSTOM WAYFINDER STYLES
@@ -211,15 +211,22 @@ $govuk-new-link-styles: true;
 
 .wayfinder-tag {
   @extend .govuk-tag;
+  color: #f0f4f5;  // Light grey-white, softer than pure white
+  font-weight: 700;
 
+  // Service type tags
   &--api { background-color: var(--wayfinder-dcs); }
   &--platform { background-color: var(--wayfinder-dso); }
   &--library { background-color: govuk-colour('dark-grey'); }
   &--event-stream { background-color: var(--wayfinder-rts); }
 
+  // Status tags
   &--live { background-color: govuk-colour('green'); }
   &--beta { background-color: govuk-colour('blue'); }
-  &--alpha { background-color: govuk-colour('orange'); }
+  &--alpha {
+    background-color: govuk-colour('orange');
+    color: #0b0c0c;  // Dark text on orange for contrast
+  }
   &--deprecated { background-color: govuk-colour('red'); }
 }
 
