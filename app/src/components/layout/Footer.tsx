@@ -1,3 +1,7 @@
+'use client';
+
+import { FeedbackButton } from '@/components/FeedbackForm';
+
 export function Footer() {
   return (
     <footer className="govuk-footer" role="contentinfo">
@@ -20,6 +24,9 @@ export function Footer() {
                 <a className="govuk-footer__link" href="#contribute">
                   Contribute
                 </a>
+              </li>
+              <li className="govuk-footer__inline-list-item">
+                <FeedbackButton />
               </li>
             </ul>
 

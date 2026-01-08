@@ -8,6 +8,16 @@ export const metadata: Metadata = {
   title: 'Wayfinder - Cross-Government Knowledge Platform',
   description:
     'Discover APIs, patterns, and expertise across government. Find what exists, learn from others, build better services.',
+  robots: {
+    index: false,
+    follow: false,
+    nocache: true,
+    googleBot: {
+      index: false,
+      follow: false,
+      noimageindex: true,
+    },
+  },
 };
 
 export default function RootLayout({

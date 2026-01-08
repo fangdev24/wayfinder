@@ -13,6 +13,7 @@ export function GraphControls() {
     layout,
     setShowServices,
     setShowPatterns,
+    setShowPolicies,
     setSelectedDepartment,
     setClumping,
     setSpacing,
@@ -74,6 +75,18 @@ export function GraphControls() {
               />
               <label className="govuk-label govuk-checkboxes__label" htmlFor="show-patterns">
                 Patterns
+              </label>
+            </div>
+            <div className="govuk-checkboxes__item">
+              <input
+                className="govuk-checkboxes__input"
+                id="show-policies"
+                type="checkbox"
+                checked={filters.showPolicies}
+                onChange={(e) => setShowPolicies(e.target.checked)}
+              />
+              <label className="govuk-label govuk-checkboxes__label" htmlFor="show-policies">
+                Policies
               </label>
             </div>
           </div>

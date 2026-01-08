@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState, useCallback, useMemo } from 'react';
 import * as d3 from 'd3';
 import { useRouter } from 'next/navigation';
-import { getGraphData, getServiceById, getPatternById, type GraphNode, type GraphEdge } from '@/lib/data';
+import { getGraphData, getServiceById, getPatternById, getPolicyById, type GraphNode, type GraphEdge } from '@/lib/data';
 import { useGraphFilters } from './GraphContext';
 
 // Department colours matching the legend
@@ -15,6 +15,7 @@ const DEPARTMENT_COLOURS: Record<string, string> = {
   vla: '#f47738',
   nhds: '#005eb8',
   patterns: '#505a5f',
+  policies: '#6f72af',
 };
 
 interface SimNode extends d3.SimulationNodeDatum, GraphNode {
@@ -73,11 +74,13 @@ export function GraphCanvas() {
       // Filter by node type
       if (node.type === 'service' && !filters.showServices) return false;
       if (node.type === 'pattern' && !filters.showPatterns) return false;
+      if (node.type === 'policy' && !filters.showPolicies) return false;
 
       // Filter by department
       if (filters.selectedDepartment !== 'all') {
-        // Patterns don't have departments, so show them if patterns are enabled
+        // Patterns and policies don't have departments in the same way, so show them when their type is enabled
         if (node.type === 'pattern') return true;
+        if (node.type === 'policy') return true;
         if (node.department !== filters.selectedDepartment) return false;
       }
 
@@ -204,7 +207,7 @@ export function GraphCanvas() {
 
     // Create arrow markers for directed edges
     svg.append('defs').selectAll('marker')
-      .data(['consumes', 'depends-on', 'implements'])
+      .data(['consumes', 'depends-on', 'implements', 'governs', 'requires'])
       .enter().append('marker')
       .attr('id', d => `arrow-${d}`)
       .attr('viewBox', '0 -5 10 10')
@@ -214,11 +217,15 @@ export function GraphCanvas() {
       .attr('markerHeight', 6)
       .attr('orient', 'auto')
       .append('path')
-      .attr('fill', d => d === 'implements' ? '#b1b4b6' : '#505a5f')
+      .attr('fill', d => {
+        if (d === 'implements') return '#b1b4b6';
+        if (d === 'governs' || d === 'requires') return '#6f72af';
+        return '#505a5f';
+      })
       .attr('d', 'M0,-5L10,0L0,5');
 
     // Calculate cluster centers for each department (arranged in a circle)
-    const groups = ['dso', 'dcs', 'rts', 'bia', 'vla', 'nhds', 'patterns'];
+    const groups = ['dso', 'dcs', 'rts', 'bia', 'vla', 'nhds', 'patterns', 'policies'];
     const clusterCenters: Record<string, { x: number; y: number }> = {};
     groups.forEach((group, i) => {
       const angle = (i / groups.length) * 2 * Math.PI - Math.PI / 2;
@@ -256,9 +263,18 @@ export function GraphCanvas() {
       .selectAll('line')
       .data(edges)
       .enter().append('line')
-      .attr('stroke', d => d.crossDepartment ? '#d4351c' : (d.type === 'implements' ? '#b1b4b6' : '#505a5f'))
+      .attr('stroke', d => {
+        if (d.crossDepartment) return '#d4351c';
+        if (d.type === 'implements') return '#b1b4b6';
+        if (d.type === 'governs' || d.type === 'requires') return '#6f72af';
+        return '#505a5f';
+      })
       .attr('stroke-width', d => d.crossDepartment ? 2 : 1)
-      .attr('stroke-dasharray', d => d.type === 'implements' ? '4,4' : 'none')
+      .attr('stroke-dasharray', d => {
+        if (d.type === 'implements') return '4,4';
+        if (d.type === 'requires') return '2,2';
+        return 'none';
+      })
       .attr('marker-end', d => `url(#arrow-${d.type})`);
 
     // Store link selection for use in selection effect
@@ -300,6 +316,18 @@ export function GraphCanvas() {
           .attr('x', -8)
           .attr('y', -8)
           .attr('transform', 'rotate(45)')
+          .attr('fill', color)
+          .attr('stroke', '#0b0c0c')
+          .attr('stroke-width', 1);
+      } else if (d.type === 'policy') {
+        // Hexagon shape for policies
+        const hexRadius = 11;
+        const hexPoints = d3.range(6).map(i => {
+          const angle = (i * 60 - 30) * Math.PI / 180;
+          return [Math.cos(angle) * hexRadius, Math.sin(angle) * hexRadius];
+        });
+        el.append('polygon')
+          .attr('points', hexPoints.map(p => p.join(',')).join(' '))
           .attr('fill', color)
           .attr('stroke', '#0b0c0c')
           .attr('stroke-width', 1);
@@ -399,6 +427,8 @@ export function GraphCanvas() {
           router.push(`/services/${d.id}`);
         } else if (d.type === 'pattern') {
           router.push(`/patterns/${d.id}`);
+        } else if (d.type === 'policy') {
+          router.push(`/policies/${d.id}`);
         }
       });
 
@@ -459,6 +489,8 @@ export function GraphCanvas() {
       return getServiceById(selectedNode.id);
     } else if (selectedNode.type === 'pattern') {
       return getPatternById(selectedNode.id);
+    } else if (selectedNode.type === 'policy') {
+      return getPolicyById(selectedNode.id);
     }
     return null;
   };
@@ -528,7 +560,7 @@ export function GraphCanvas() {
           <strong>{tooltipData.node.label}</strong>
           <br />
           <span style={{ color: '#505a5f' }}>
-            {tooltipData.node.type === 'service' ? 'Service' : 'Pattern'}
+            {tooltipData.node.type === 'service' ? 'Service' : tooltipData.node.type === 'pattern' ? 'Pattern' : 'Policy'}
             {tooltipData.node.department && ` • ${tooltipData.node.department.toUpperCase()}`}
           </span>
           <br />
@@ -597,6 +629,8 @@ export function GraphCanvas() {
                 router.push(`/services/${selectedNode.id}`);
               } else if (selectedNode.type === 'pattern') {
                 router.push(`/patterns/${selectedNode.id}`);
+              } else if (selectedNode.type === 'policy') {
+                router.push(`/policies/${selectedNode.id}`);
               }
             }}
           >

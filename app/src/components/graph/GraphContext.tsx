@@ -5,6 +5,7 @@ import { createContext, useContext, useState, type ReactNode } from 'react';
 interface GraphFilters {
   showServices: boolean;
   showPatterns: boolean;
+  showPolicies: boolean;
   selectedDepartment: string;
 }
 
@@ -20,6 +21,7 @@ interface GraphContextValue {
   layout: GraphLayout;
   setShowServices: (show: boolean) => void;
   setShowPatterns: (show: boolean) => void;
+  setShowPolicies: (show: boolean) => void;
   setSelectedDepartment: (department: string) => void;
   setClumping: (value: number) => void;
   setSpacing: (value: number) => void;
@@ -30,6 +32,7 @@ interface GraphContextValue {
 const defaultFilters: GraphFilters = {
   showServices: true,
   showPatterns: true,
+  showPolicies: true,
   selectedDepartment: 'all',
 };
 
@@ -50,6 +53,10 @@ export function GraphProvider({ children }: { children: ReactNode }) {
 
   const setShowPatterns = (show: boolean) => {
     setFilters(prev => ({ ...prev, showPatterns: show }));
+  };
+
+  const setShowPolicies = (show: boolean) => {
+    setFilters(prev => ({ ...prev, showPolicies: show }));
   };
 
   const setSelectedDepartment = (department: string) => {
@@ -79,6 +86,7 @@ export function GraphProvider({ children }: { children: ReactNode }) {
         layout,
         setShowServices,
         setShowPatterns,
+        setShowPolicies,
         setSelectedDepartment,
         setClumping,
         setSpacing,

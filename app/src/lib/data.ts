@@ -15,6 +15,7 @@ import {
   teams,
   services,
   patterns,
+  policies,
   relationships,
   people,
   stats,
@@ -31,6 +32,12 @@ import {
   getPeopleByTeam as _getPeopleByTeam,
   getPeopleByDepartment as _getPeopleByDepartment,
   getMaintainersForService as _getMaintainersForService,
+  // Policy helpers
+  getPolicyById as _getPolicyById,
+  getPoliciesByDepartment as _getPoliciesByDepartment,
+  getPoliciesAffectingService as _getPoliciesAffectingService,
+  getRelatedPolicies as _getRelatedPolicies,
+  getPoliciesByCategory as _getPoliciesByCategory,
 } from '@/data-source';
 
 // Re-export data collections
@@ -40,6 +47,7 @@ export {
   teams,
   services,
   patterns,
+  policies,
   relationships,
   people,
   stats,
@@ -64,6 +72,9 @@ export type {
   Person,
   TeamWithSolid,
   SearchResult,
+  Policy,
+  PolicyCategory,
+  PolicyStatus,
 } from '@/data-source/schema';
 
 // ============================================================================
@@ -101,6 +112,16 @@ export const getPersonByWebId = _getPersonByWebId;
 export const getPeopleByTeam = _getPeopleByTeam;
 export const getPeopleByDepartment = _getPeopleByDepartment;
 export const getMaintainersForService = _getMaintainersForService;
+
+// ============================================================================
+// POLICY HELPERS
+// ============================================================================
+
+export const getPolicyById = _getPolicyById;
+export const getPoliciesByDepartment = _getPoliciesByDepartment;
+export const getPoliciesAffectingService = _getPoliciesAffectingService;
+export const getRelatedPolicies = _getRelatedPolicies;
+export const getPoliciesByCategory = _getPoliciesByCategory;
 
 // ============================================================================
 // DEPARTMENT HELPERS
@@ -291,7 +312,7 @@ export function searchAll(query: string, filters?: SearchFilters) {
 
 export interface GraphNode {
   id: string;
-  type: 'department' | 'team' | 'service' | 'pattern';
+  type: 'department' | 'team' | 'service' | 'pattern' | 'policy';
   label: string;
   department?: string;
   group?: string;
@@ -326,6 +347,17 @@ export function getGraphData() {
       type: 'pattern',
       label: p.name,
       group: 'patterns',
+    });
+  });
+
+  // Add policy nodes
+  policies.forEach((p) => {
+    nodes.push({
+      id: p.id,
+      type: 'policy',
+      label: p.name,
+      department: p.leadDepartment,
+      group: 'policies',
     });
   });
 
@@ -370,6 +402,32 @@ export function getGraphData() {
           source: s.id,
           target: patternId,
           type: 'implements',
+        });
+      }
+    });
+  });
+
+  // Add policy edges (policy -> services it governs)
+  policies.forEach((p) => {
+    p.relatedServices.forEach((serviceId) => {
+      if (nodeIds.has(serviceId)) {
+        const service = getServiceById(serviceId);
+        edges.push({
+          source: p.id,
+          target: serviceId,
+          type: 'governs',
+          crossDepartment: service ? service.departmentId !== p.leadDepartment : false,
+        });
+      }
+    });
+
+    // Add policy -> policy edges for related policies
+    p.relatedPolicies.forEach((relatedPolicyId) => {
+      if (nodeIds.has(relatedPolicyId)) {
+        edges.push({
+          source: p.id,
+          target: relatedPolicyId,
+          type: 'requires',
         });
       }
     });

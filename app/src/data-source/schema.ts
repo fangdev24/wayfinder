@@ -134,6 +134,54 @@ export interface Contributor {
 }
 
 // ============================================================================
+// POLICIES
+// ============================================================================
+
+/**
+ * Cross-government policy that affects multiple departments
+ *
+ * Policies represent government initiatives, frameworks, or mandates
+ * that span departmental boundaries. They link to the services and
+ * departments they govern or enable.
+ */
+export interface Policy {
+  id: string;                    // e.g., "net-zero-digital"
+  name: string;                  // Human-readable name
+  category: PolicyCategory;
+  description: string;
+  objectives: string[];          // What this policy aims to achieve
+
+  // Relationships
+  leadDepartment: string;        // Primary owning department ID
+  affectedDepartments: string[]; // All departments affected
+  relatedServices: string[];     // Service IDs this policy governs
+  relatedPolicies: string[];     // Related policy IDs
+
+  // Metadata
+  status: PolicyStatus;
+  effectiveDate: string;         // When the policy came into effect
+  reviewDate?: string;           // Next review date
+  legislationRef?: string;       // Reference to legislation.gov.uk
+
+  // Tags for search
+  tags: string[];
+}
+
+export type PolicyCategory =
+  | 'digital'                    // Digital transformation policies
+  | 'data'                       // Data sharing, governance
+  | 'security'                   // Cybersecurity, NCSC guidance
+  | 'identity'                   // Identity, authentication
+  | 'environment'                // Net zero, sustainability
+  | 'welfare';                   // Benefits, citizen support
+
+export type PolicyStatus =
+  | 'active'
+  | 'consultation'
+  | 'proposed'
+  | 'superseded';
+
+// ============================================================================
 // GRAPH RELATIONSHIPS
 // ============================================================================
 
@@ -151,7 +199,8 @@ export type EntityType =
   | 'department'
   | 'team'
   | 'service'
-  | 'pattern';
+  | 'pattern'
+  | 'policy';
 
 export type RelationshipType =
   | 'maintains'          // team -> service
@@ -159,7 +208,9 @@ export type RelationshipType =
   | 'consumes'           // service -> service
   | 'implements'         // service -> pattern
   | 'contributed-to'     // team -> pattern
-  | 'related-to';        // any -> any
+  | 'related-to'         // any -> any
+  | 'governs'            // policy -> service/department
+  | 'requires';          // policy -> policy
 
 // ============================================================================
 // SEARCH & DISCOVERY
@@ -235,6 +286,7 @@ export interface DemoDataset {
   teams: Team[];
   services: Service[];
   patterns: Pattern[];
+  policies: Policy[];
   relationships: Relationship[];
   // Solid integration
   people?: Person[];

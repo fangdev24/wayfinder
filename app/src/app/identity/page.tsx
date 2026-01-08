@@ -170,6 +170,96 @@ export default function IdentityPage() {
         </div>
       </div>
 
+      {/* Global Adoption */}
+      <div className="govuk-grid-row govuk-!-margin-top-8">
+        <div className="govuk-grid-column-two-thirds">
+          <h2 className="govuk-heading-l">Global government adoption</h2>
+          <p className="govuk-body">
+            Solid technology is already being deployed by governments worldwide.
+            These real-world implementations demonstrate the viability of
+            decentralised data management at national scale.
+          </p>
+
+          <h3 className="govuk-heading-m govuk-!-margin-top-6">Flanders, Belgium</h3>
+          <p className="govuk-body">
+            The Flemish government is the global leader in Solid adoption.
+            <strong> Athumi</strong>, a government-owned company established in 2022,
+            provides Solid Pods to all 6.5 million Flemish citizens as personal
+            data vaults for sharing information with government services.
+          </p>
+          <p className="govuk-body">
+            The region invested €14 million in <strong>SolidLab</strong> (2022-2026),
+            a research initiative in partnership with imec, Ghent University,
+            KU Leuven, and VUB. Current use cases include:
+          </p>
+          <ul className="govuk-list govuk-list--bullet">
+            <li>Digital diploma sharing with employers</li>
+            <li>Hospital data exchange between healthcare providers</li>
+            <li>Integration with itsme (national digital identity)</li>
+            <li>Citizen consent management for data sharing</li>
+          </ul>
+
+          <h3 className="govuk-heading-m">United Kingdom (NHS)</h3>
+          <p className="govuk-body">
+            The NHS has piloted Solid technology in <strong>Greater Manchester</strong>,
+            focusing on dementia care pathways. The pilot connects Electronic Health
+            Record systems to patient-owned Pods, giving patients control over
+            their health data while enabling seamless sharing between care providers.
+          </p>
+          <p className="govuk-body">
+            This aligns with the NHS Long Term Plan goal of empowering patients
+            with access to and control over their personal health records.
+          </p>
+
+          <h3 className="govuk-heading-m">Other countries</h3>
+          <p className="govuk-body">
+            Several other governments are actively exploring or implementing Solid:
+          </p>
+          <ul className="govuk-list govuk-list--bullet">
+            <li><strong>Sweden</strong> &ndash; Contracts signed for citizen data management</li>
+            <li><strong>Basque Country, Spain</strong> &ndash; Regional government pilot programmes</li>
+            <li><strong>Argentina</strong> &ndash; National-level implementation discussions</li>
+            <li><strong>Singapore</strong> &ndash; Smart Nation initiative pilots</li>
+            <li><strong>Japan</strong> &ndash; Digital agency exploration</li>
+            <li><strong>Helsinki, Finland</strong> &ndash; City-level data portability projects</li>
+          </ul>
+        </div>
+
+        <div className="govuk-grid-column-one-third">
+          <div className="govuk-!-padding-4 govuk-!-margin-bottom-6" style={{ background: '#f3f2f1' }}>
+            <h3 className="govuk-heading-s">Key organisations</h3>
+            <dl className="govuk-summary-list govuk-summary-list--no-border">
+              <div className="govuk-summary-list__row">
+                <dt className="govuk-summary-list__key" style={{ fontSize: '14px' }}>Inrupt</dt>
+                <dd className="govuk-summary-list__value" style={{ fontSize: '14px' }}>
+                  Founded by Tim Berners-Lee, enterprise Solid provider
+                </dd>
+              </div>
+              <div className="govuk-summary-list__row">
+                <dt className="govuk-summary-list__key" style={{ fontSize: '14px' }}>Athumi</dt>
+                <dd className="govuk-summary-list__value" style={{ fontSize: '14px' }}>
+                  Flemish government data vault operator
+                </dd>
+              </div>
+              <div className="govuk-summary-list__row">
+                <dt className="govuk-summary-list__key" style={{ fontSize: '14px' }}>SolidLab</dt>
+                <dd className="govuk-summary-list__value" style={{ fontSize: '14px' }}>
+                  €14M Flemish research initiative
+                </dd>
+              </div>
+            </dl>
+          </div>
+
+          <div className="govuk-inset-text">
+            <p className="govuk-body-s govuk-!-margin-bottom-0">
+              The BBC and NatWest Bank are also using Solid for media
+              personalisation and customer data management respectively,
+              demonstrating adoption beyond government.
+            </p>
+          </div>
+        </div>
+      </div>
+
       {/* Comparison */}
       <div className="govuk-grid-row govuk-!-margin-top-8">
         <div className="govuk-grid-column-full">

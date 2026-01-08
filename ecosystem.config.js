@@ -32,6 +32,8 @@ module.exports = {
       env: {
         NODE_ENV: 'production',
         PORT: 3001,
+        // Slack credentials loaded from shell environment - set in ~/.bashrc or similar
+        // SLACK_BOT_TOKEN and SLACK_FEEDBACK_CHANNEL must be exported before pm2 start
       },
       env_dev: {
         NODE_ENV: 'development',

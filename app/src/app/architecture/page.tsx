@@ -334,6 +334,227 @@ export default function ArchitecturePage() {
         </div>
       </div>
 
+      {/* Sovereign AI Pipeline */}
+      <div className="govuk-grid-row govuk-!-margin-top-8">
+        <div className="govuk-grid-column-two-thirds">
+          <h2 className="govuk-heading-l">Sovereign AI Pipeline</h2>
+          <p className="govuk-body">
+            A key question: how do departments populate their Data Pods without manual data entry?
+            The answer: <strong>each department runs their own AI extraction pipeline</strong>.
+          </p>
+
+          <div className="govuk-inset-text">
+            <p className="govuk-body-s govuk-!-margin-bottom-0">
+              <strong>Key principle:</strong> External AI never touches internal documentation.
+              Departments extract and publish what they choose. Wayfinder only reads published Pods.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      {/* Sovereign Pipeline Diagram */}
+      <div className="govuk-grid-row govuk-!-margin-top-6">
+        <div className="govuk-grid-column-full">
+          <h3 className="govuk-heading-m">Department-Controlled Extraction</h3>
+          <div className="govuk-inset-text">
+            <pre style={{ fontFamily: 'monospace', fontSize: '12px', lineHeight: '1.4', margin: 0, whiteSpace: 'pre', overflowX: 'auto' }}>
+{`┌─────────────────────────────────────────────────────────────────────────────────────────┐
+│                              DEPARTMENT BOUNDARY                                         │
+│                        (All processing happens inside)                                   │
+│                                                                                          │
+│  ┌──────────────────────┐                                                               │
+│  │   Internal Sources   │                                                               │
+│  ├──────────────────────┤                                                               │
+│  │ • Confluence wikis   │                                                               │
+│  │ • SharePoint docs    │                                                               │
+│  │ • GitHub repos       │         ┌──────────────────────────────┐                      │
+│  │ • ServiceNow CMDB    │────────▶│  Department's AI Pipeline    │                      │
+│  │ • API specifications │         │  (Runs on dept infrastructure)│                      │
+│  │ • Architecture docs  │         ├──────────────────────────────┤                      │
+│  └──────────────────────┘         │                              │                      │
+│         PRIVATE                   │  • Bedrock / Azure OpenAI /  │                      │
+│                                   │    on-prem LLM               │                      │
+│                                   │  • Entity extraction         │      ┌─────────────┐ │
+│                                   │  • Relationship inference    │─────▶│  Data Pod   │ │
+│                                   │  • Schema mapping            │      │  (Published)│ │
+│                                   │                              │      └──────┬──────┘ │
+│                                   └──────────────────────────────┘             │        │
+│                                                 │                              │        │
+│                                                 ▼                              │        │
+│                                   ┌──────────────────────────────┐             │        │
+│                                   │     Review & Approval        │             │        │
+│                                   │  (Human validates before     │             │        │
+│                                   │   publishing to Pod)         │             │        │
+│                                   └──────────────────────────────┘             │        │
+│                                                                                │        │
+└────────────────────────────────────────────────────────────────────────────────┼────────┘
+                                                                                 │
+                                                                                 ▼
+                                                              ┌──────────────────────────┐
+                                                              │       Wayfinder          │
+                                                              │     (Read Only)          │
+                                                              │                          │
+                                                              │  • Queries published     │
+                                                              │    Pod data              │
+                                                              │  • Never sees internal   │
+                                                              │    documentation         │
+                                                              │  • Builds cross-govt     │
+                                                              │    knowledge graph       │
+                                                              └──────────────────────────┘`}
+            </pre>
+          </div>
+        </div>
+      </div>
+
+      {/* Why Sovereign */}
+      <div className="govuk-grid-row govuk-!-margin-top-6">
+        <div className="govuk-grid-column-two-thirds">
+          <h3 className="govuk-heading-m">Why Sovereign AI?</h3>
+          <p className="govuk-body">
+            Departments may have legitimate concerns about external systems processing
+            their internal documentation:
+          </p>
+
+          <table className="govuk-table">
+            <thead className="govuk-table__head">
+              <tr className="govuk-table__row">
+                <th scope="col" className="govuk-table__header" style={{ width: '35%' }}>Concern</th>
+                <th scope="col" className="govuk-table__header">Sovereign Solution</th>
+              </tr>
+            </thead>
+            <tbody className="govuk-table__body">
+              <tr className="govuk-table__row">
+                <th scope="row" className="govuk-table__header">Data leaves our control</th>
+                <td className="govuk-table__cell">
+                  AI runs on your infrastructure. Data never leaves your boundary.
+                </td>
+              </tr>
+              <tr className="govuk-table__row">
+                <th scope="row" className="govuk-table__header">Sensitive info extracted</th>
+                <td className="govuk-table__cell">
+                  You review all extractions before publishing. Nothing goes to Pod without approval.
+                </td>
+              </tr>
+              <tr className="govuk-table__row">
+                <th scope="row" className="govuk-table__header">Vendor lock-in</th>
+                <td className="govuk-table__cell">
+                  Use any AI provider: Bedrock, Azure OpenAI, on-premises Llama, or custom models.
+                </td>
+              </tr>
+              <tr className="govuk-table__row">
+                <th scope="row" className="govuk-table__header">Security accreditation</th>
+                <td className="govuk-table__cell">
+                  Pipeline runs within existing security boundary. No new external access required.
+                </td>
+              </tr>
+            </tbody>
+          </table>
+
+          <h3 className="govuk-heading-m govuk-!-margin-top-6">What Wayfinder Provides</h3>
+          <p className="govuk-body">
+            To enable consistent, interoperable extraction across departments:
+          </p>
+
+          <dl className="govuk-summary-list">
+            <div className="govuk-summary-list__row">
+              <dt className="govuk-summary-list__key">Reference implementation</dt>
+              <dd className="govuk-summary-list__value">
+                Open source extraction pipeline that departments can fork, customise, and deploy
+                on their own infrastructure. Includes connectors for common documentation sources.
+              </dd>
+            </div>
+            <div className="govuk-summary-list__row">
+              <dt className="govuk-summary-list__key">Schema specification</dt>
+              <dd className="govuk-summary-list__value">
+                Standard RDF vocabulary for services, patterns, teams, and relationships.
+                Ensures data from different departments is interoperable.
+              </dd>
+            </div>
+            <div className="govuk-summary-list__row">
+              <dt className="govuk-summary-list__key">Validation tools</dt>
+              <dd className="govuk-summary-list__value">
+                Tools to verify Pod data matches the schema before publishing.
+                Catches issues before they affect the cross-government graph.
+              </dd>
+            </div>
+            <div className="govuk-summary-list__row">
+              <dt className="govuk-summary-list__key">Extraction prompts</dt>
+              <dd className="govuk-summary-list__value">
+                Tested prompts for entity and relationship extraction. Departments can
+                use as-is or adapt to their documentation style.
+              </dd>
+            </div>
+          </dl>
+        </div>
+
+        <div className="govuk-grid-column-one-third">
+          <div className="govuk-!-padding-4" style={{ background: '#f3f2f1' }}>
+            <h3 className="govuk-heading-s">Extraction accuracy</h3>
+            <p className="govuk-body-s">
+              AI extraction typically achieves 70-80% accuracy for entity and
+              relationship extraction from technical documentation.
+            </p>
+            <p className="govuk-body-s govuk-!-margin-bottom-0">
+              The review step catches errors before publishing. Over time,
+              feedback improves extraction quality.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      {/* Extraction Pipeline */}
+      <div className="govuk-grid-row govuk-!-margin-top-6">
+        <div className="govuk-grid-column-two-thirds">
+          <h3 className="govuk-heading-m">Example Extraction Pipeline</h3>
+          <p className="govuk-body">
+            How AI transforms documentation into structured Pod data:
+          </p>
+
+          <ol className="govuk-list govuk-list--number">
+            <li>
+              <strong>Source crawl</strong> &ndash; Connectors fetch content from Confluence,
+              SharePoint, GitHub, etc. Respects existing access controls.
+            </li>
+            <li>
+              <strong>Content chunking</strong> &ndash; Documents split into processable
+              segments with context preservation.
+            </li>
+            <li>
+              <strong>Entity extraction</strong> &ndash; LLM identifies services, APIs,
+              teams, patterns, dependencies mentioned in the content.
+            </li>
+            <li>
+              <strong>Relationship inference</strong> &ndash; LLM determines how entities
+              relate: &quot;Service A depends on API B&quot;, &quot;Team X maintains Service Y&quot;.
+            </li>
+            <li>
+              <strong>Schema mapping</strong> &ndash; Extracted entities mapped to
+              Wayfinder RDF vocabulary.
+            </li>
+            <li>
+              <strong>Confidence scoring</strong> &ndash; Each extraction tagged with
+              confidence level. Low-confidence items flagged for human review.
+            </li>
+            <li>
+              <strong>Human review</strong> &ndash; Staff validate extractions via
+              approval workflow. Corrections fed back to improve future runs.
+            </li>
+            <li>
+              <strong>Pod publish</strong> &ndash; Approved entities written to
+              department&apos;s Data Pod as RDF.
+            </li>
+          </ol>
+
+          <div className="govuk-inset-text">
+            <p className="govuk-body-s govuk-!-margin-bottom-0">
+              <strong>Result:</strong> Departments connect existing documentation sources,
+              AI builds the catalogue, humans validate. Minimal manual data entry while
+              maintaining full control and accuracy.
+            </p>
+          </div>
+        </div>
+      </div>
+
       {/* Benefits */}
       <div className="govuk-grid-row govuk-!-margin-top-8">
         <div className="govuk-grid-column-full">
@@ -396,9 +617,15 @@ export default function ArchitecturePage() {
 
           <h3 className="govuk-heading-m">Vocabulary governance</h3>
           <p className="govuk-body">
-            Departments must agree on shared vocabularies for services, patterns, and
-            relationships. Without this, data won&apos;t be interoperable. A central
-            standards body (like DSO) would maintain the Wayfinder vocabulary.
+            <strong>Largely solved by the reference implementation.</strong> When departments
+            use the provided extraction pipeline and validation tools, vocabulary compliance
+            is automatic&mdash;the schema is embedded in the tools themselves.
+          </p>
+          <p className="govuk-body">
+            Governance shifts from &quot;negotiate shared vocabularies&quot; to
+            &quot;maintain the reference implementation&quot;. A central standards body
+            (like DSO) would own the reference tools and evolve the schema over time,
+            with departments simply updating their pipeline version.
           </p>
 
           <h3 className="govuk-heading-m">Performance tuning</h3>
@@ -430,6 +657,14 @@ export default function ArchitecturePage() {
             as the technology stack. These remain valuable, but their role changes in the
             federated model: they become the <strong>discovery layer</strong>, not the source of truth.
           </p>
+          <div className="govuk-inset-text">
+            <p className="govuk-body-s govuk-!-margin-bottom-0">
+              <strong>Note:</strong> The Bedrock AI in this discovery layer serves a different
+              purpose than the sovereign AI pipeline. Discovery layer AI handles query parsing,
+              summarisation, and recommendations. Sovereign AI (run by departments) handles
+              entity extraction from internal documentation. Two distinct uses of AI.
+            </p>
+          </div>
         </div>
       </div>
 
@@ -819,10 +1054,11 @@ export default function ArchitecturePage() {
           </p>
           <ol className="govuk-list govuk-list--number">
             <li>Define the Wayfinder RDF vocabulary for services, patterns, teams</li>
-            <li>Pilot with one department running the 3-Pod model</li>
-            <li>Build the aggregator layer with caching and federation</li>
-            <li>Establish governance for vocabulary evolution</li>
-            <li>Onboard additional departments incrementally</li>
+            <li>Build and open-source the reference extraction pipeline with embedded schema</li>
+            <li>Pilot with one department: deploy 3-Pod model and run sovereign AI extraction</li>
+            <li>Build the central discovery layer (Neptune, OpenSearch, Bedrock for queries)</li>
+            <li>Onboard additional departments using the reference implementation</li>
+            <li>Evolve vocabulary via reference implementation updates (not negotiations)</li>
             <li>Add Agent Pod capabilities as AI adoption grows</li>
           </ol>
 

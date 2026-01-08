@@ -282,3 +282,36 @@ $govuk-new-link-styles: true;
     }
   }
 }
+
+// ============================================================================
+// FEEDBACK FORM
+// ============================================================================
+
+.wayfinder-feedback-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 1000;
+  display: flex;
+  justify-content: flex-end;
+  align-items: flex-start;
+  padding: govuk-spacing(4);
+}
+
+.wayfinder-feedback-panel {
+  background: govuk-colour('white');
+  border: 1px solid govuk-colour('mid-grey');
+  padding: govuk-spacing(5);
+  width: 100%;
+  max-width: 400px;
+  max-height: calc(100vh - govuk-spacing(8));
+  overflow-y: auto;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+
+  @media (max-width: 640px) {
+    max-width: 100%;
+  }
+}

@@ -43,11 +43,12 @@ import { departments } from './departments';
 import { teams } from './teams';
 import { services } from './services';
 import { patterns } from './patterns';
+import { policies } from './policies';
 import { relationships } from './relationships';
 import { people } from './people';
 
 export const demoDataset: DemoDataset = {
-  version: '1.1.0',
+  version: '1.2.0',
   generated: '2026-03-15T10:00:00Z',
   description:
     'Fictional cross-government knowledge graph with Solid Pod integration demonstrating the Wayfinder concept',
@@ -55,6 +56,7 @@ export const demoDataset: DemoDataset = {
   teams,
   services,
   patterns,
+  policies,
   relationships,
   people,
 };
@@ -64,6 +66,7 @@ export { departments } from './departments';
 export { teams } from './teams';
 export { services, getServicesByDepartment, getServicesByTeam, getServiceById, getConsumers, getDependencies } from './services';
 export { patterns } from './patterns';
+export { policies, getPolicyById, getPoliciesByDepartment, getPoliciesByCategory, getPoliciesAffectingService, getRelatedPolicies } from './policies';
 export { relationships } from './relationships';
 export { people, getPersonById, getPersonByWebId, getPeopleByTeam, getPeopleByDepartment, getMaintainersForService } from './people';
 
@@ -83,6 +86,7 @@ export const stats = {
   people: people.length,
   services: services.length,
   patterns: patterns.length,
+  policies: policies.length,
   relationships: relationships.length,
 
   servicesByType: {
