@@ -1,0 +1,53 @@
+{
+  "statusLine": {
+    "type": "command",
+    "command": ".claude/statusline.sh",
+    "padding": 0
+  },
+  "hooks": {
+    "UserPromptSubmit": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": ".claude/hooks/session-scribe.sh"
+          }
+        ]
+      }
+    ]
+  },
+  "permissions": {
+    "allow": [
+      "Read(**)",
+      "Write(app/**)",
+      "Write(pods/**)",
+      "Write(slack-bot/**)",
+      "Write(planning/**)",
+      "Write(knowledge-base/**)",
+      "Bash(npm:*)",
+      "Bash(npx:*)",
+      "Bash(git:*)",
+      "Bash(pm2:*)",
+      "Bash(curl:*)",
+      "Bash(mkdir:*)",
+      "Bash(ls:*)",
+      "Bash(cat:*)",
+      "Bash(rm:*)",
+      "Bash(cp:*)",
+      "Bash(mv:*)",
+      "Bash(grep:*)",
+      "Bash(find:*)",
+      "Bash(head:*)",
+      "Bash(tail:*)",
+      "Bash(wc:*)",
+      "Bash(diff:*)",
+      "Bash(.claude/scripts/*.sh:*)"
+    ],
+    "deny": [
+      "Write(.env*)",
+      "Write(**/*secret*)",
+      "Write(**/*credential*)"
+    ]
+  }
+}

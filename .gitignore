@@ -39,3 +39,7 @@ coverage/
 /solid*.md
 /solid-*.md
 /research/SOLID*.md
+
+# Claude Code local config (user-specific settings)
+.claude/settings.local.json
+.claude/*.local.md

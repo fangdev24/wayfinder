@@ -1,0 +1,54 @@
+---
+# Wayfinder Local Configuration
+# Copy this to .claude/wayfinder.local.md and fill in your values
+# This file is gitignored - safe for secrets
+
+# Slack notifications for long-running tasks
+slack:
+  webhook_url: "https://hooks.slack.com/services/YOUR/WEBHOOK/URL"
+  channel: "#wayfinder-builds"
+  notify_on:
+    - task_complete
+    - task_blocked
+    - rate_limit
+    - error
+
+# Development preferences
+development:
+  default_environment: "development"
+  auto_build: true  # Auto-rebuild on changes
+  auto_restart_pm2: false  # Auto-restart PM2 services
+
+# Solid Pod configuration
+pods:
+  local_server_url: "http://localhost:3002"
+  test_pod_path: "/pods/.data"
+---
+
+# Wayfinder Local Notes
+
+Use this space for any local notes or context that should persist across sessions.
+
+## Current Focus
+
+<!-- What are you currently working on? -->
+
+## Competition Context
+
+<!-- Notes about the UK Gov Innovation Competition -->
+- Submission deadline: [DATE]
+- Judging criteria: [CRITERIA]
+
+## Demo Environment
+
+<!-- Production/demo deployment notes -->
+- URL: https://wayfinder.pbj.cx
+- PM2 services: wayfinder-app, wayfinder-pods, wayfinder-slack
+
+## Blockers
+
+<!-- Any known issues or blockers -->
+
+## Notes
+
+<!-- Any other notes -->
