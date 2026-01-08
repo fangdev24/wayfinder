@@ -70,10 +70,10 @@ export default async function ServicePage({ params }: ServicePageProps) {
       {/* Service Header */}
       <div className="govuk-grid-row govuk-!-margin-top-6">
         <div className="govuk-grid-column-two-thirds">
-          <span className={`govuk-tag wayfinder-tag--${service.type}`}>
+          <span className={`wayfinder-tag wayfinder-tag--${service.type}`}>
             {service.type}
           </span>
-          <span className={`govuk-tag wayfinder-tag--${service.status} govuk-!-margin-left-2`}>
+          <span className={`wayfinder-tag wayfinder-tag--${service.status} govuk-!-margin-left-2`}>
             {service.status}
           </span>
 

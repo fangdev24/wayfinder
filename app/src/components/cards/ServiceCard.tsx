@@ -41,7 +41,7 @@ export function ServiceCard({ service, compact = false, showFull = false }: Serv
           <p className="wayfinder-card__subtitle">{service.departmentId.toUpperCase()}</p>
         </div>
         <div>
-          <span className={`govuk-tag wayfinder-tag--${service.type}`}>{service.type}</span>
+          <span className={`wayfinder-tag wayfinder-tag--${service.type}`}>{service.type}</span>
         </div>
       </div>
 
@@ -82,7 +82,7 @@ export function ServiceCard({ service, compact = false, showFull = false }: Serv
       </div>
 
       <div className="wayfinder-card__footer">
-        <span className={`govuk-tag wayfinder-tag--${service.status}`}>{service.status}</span>
+        <span className={`wayfinder-tag wayfinder-tag--${service.status}`}>{service.status}</span>
         {service.documentation && (
           <Link
             href="/docs"
