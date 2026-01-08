@@ -1045,6 +1045,113 @@ export default function ArchitecturePage() {
         </div>
       </div>
 
+      {/* Operations vs Content Administration */}
+      <div className="govuk-grid-row govuk-!-margin-top-8">
+        <div className="govuk-grid-column-two-thirds">
+          <h2 className="govuk-heading-l">Minimal Operations Footprint</h2>
+          <p className="govuk-body">
+            A key security benefit of the federated model: <strong>Wayfinder has no content
+            administration interface</strong>. This dramatically reduces the attack surface.
+          </p>
+
+          <h3 className="govuk-heading-m govuk-!-margin-top-6">Content Administration: Not Needed</h3>
+          <p className="govuk-body">
+            In traditional platforms, administrators can create, edit, and delete content.
+            This creates significant security risks:
+          </p>
+          <ul className="govuk-list govuk-list--bullet">
+            <li>Compromised admin accounts can modify or destroy data</li>
+            <li>Insider threats have broad access to sensitive information</li>
+            <li>Admin interfaces are high-value targets for attackers</li>
+            <li>Audit trails must track every admin action</li>
+          </ul>
+          <p className="govuk-body">
+            <strong>In the federated 3-Pod model, this entire category disappears.</strong> Departments
+            manage their own Pods using their own tools and access controls. Wayfinder simply
+            reads published data&mdash;it cannot modify, delete, or even access unpublished content.
+          </p>
+
+          <h3 className="govuk-heading-m">Operations Administration: Minimal</h3>
+          <p className="govuk-body">
+            What remains is lightweight operations management, most of which can be automated:
+          </p>
+        </div>
+      </div>
+
+      <div className="govuk-grid-row govuk-!-margin-top-4">
+        <div className="govuk-grid-column-full">
+          <table className="govuk-table">
+            <thead className="govuk-table__head">
+              <tr className="govuk-table__row">
+                <th scope="col" className="govuk-table__header" style={{ width: '25%' }}>Function</th>
+                <th scope="col" className="govuk-table__header" style={{ width: '40%' }}>Description</th>
+                <th scope="col" className="govuk-table__header" style={{ width: '35%' }}>Automation</th>
+              </tr>
+            </thead>
+            <tbody className="govuk-table__body">
+              <tr className="govuk-table__row">
+                <td className="govuk-table__cell">Federation registry</td>
+                <td className="govuk-table__cell">Add/remove department Pod endpoints</td>
+                <td className="govuk-table__cell">Self-service via API; human approval optional</td>
+              </tr>
+              <tr className="govuk-table__row">
+                <td className="govuk-table__cell">Health monitoring</td>
+                <td className="govuk-table__cell">Track Pod availability and sync status</td>
+                <td className="govuk-table__cell">Fully automated with alerting</td>
+              </tr>
+              <tr className="govuk-table__row">
+                <td className="govuk-table__cell">Schema evolution</td>
+                <td className="govuk-table__cell">Update reference implementation</td>
+                <td className="govuk-table__cell">Version controlled; departments pull updates</td>
+              </tr>
+              <tr className="govuk-table__row">
+                <td className="govuk-table__cell">Query analytics</td>
+                <td className="govuk-table__cell">Usage patterns and performance</td>
+                <td className="govuk-table__cell">Fully automated dashboards</td>
+              </tr>
+              <tr className="govuk-table__row">
+                <td className="govuk-table__cell">Incident response</td>
+                <td className="govuk-table__cell">Handle federation issues</td>
+                <td className="govuk-table__cell">Runbooks; most self-healing</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div className="govuk-grid-row govuk-!-margin-top-4">
+        <div className="govuk-grid-column-two-thirds">
+          <div className="govuk-inset-text">
+            <p className="govuk-body-s govuk-!-margin-bottom-0">
+              <strong>Security principle:</strong> Wayfinder is a read-only discovery layer.
+              It indexes published data but cannot modify source systems. Even if fully
+              compromised, an attacker cannot alter department content&mdash;only disrupt
+              discovery temporarily.
+            </p>
+          </div>
+        </div>
+
+        <div className="govuk-grid-column-one-third">
+          <div className="govuk-!-padding-4" style={{ background: '#f3f2f1' }}>
+            <h4 className="govuk-heading-s govuk-!-margin-bottom-2">Attack surface comparison</h4>
+            <dl className="govuk-summary-list govuk-summary-list--no-border">
+              <div className="govuk-summary-list__row">
+                <dt className="govuk-summary-list__key" style={{ fontSize: '14px' }}>Traditional</dt>
+                <dd className="govuk-summary-list__value" style={{ fontSize: '14px' }}>
+                  Admin can read, write, delete all content
+                </dd>
+              </div>
+              <div className="govuk-summary-list__row">
+                <dt className="govuk-summary-list__key" style={{ fontSize: '14px' }}>Federated</dt>
+                <dd className="govuk-summary-list__value" style={{ fontSize: '14px' }}>
+                  Central layer is read-only; no content access
+                </dd>
+              </div>
+            </dl>
+          </div>
+        </div>
+      </div>
+
       {/* Next Steps */}
       <div className="govuk-grid-row govuk-!-margin-top-8 govuk-!-margin-bottom-8">
         <div className="govuk-grid-column-two-thirds">
