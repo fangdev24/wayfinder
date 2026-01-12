@@ -1,5 +1,7 @@
 'use client';
 
+import Link from 'next/link';
+
 interface PodIndicatorProps {
   message: string;
   webId?: string;
@@ -21,14 +23,12 @@ export function PodIndicator({ message, webId }: PodIndicatorProps) {
       </svg>
       <span className="wayfinder-pod-indicator__text">{message}</span>
       {webId && (
-        <a
-          href={webId}
+        <Link
+          href={`/pod-viewer?webId=${encodeURIComponent(webId)}`}
           className="govuk-link govuk-!-font-size-14 govuk-!-margin-left-2"
-          target="_blank"
-          rel="noopener noreferrer"
         >
           View Pod
-        </a>
+        </Link>
       )}
     </div>
   );

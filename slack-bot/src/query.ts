@@ -17,7 +17,11 @@ import {
   departments,
 } from '../../demo-data/index.js';
 
+// Import policies from app data-source (not in demo-data)
+import { policies } from '../../app/src/data-source/policies.js';
+
 import type { Service, Team, Person, Pattern, Department } from '../../demo-data/schema.js';
+import type { Policy } from '../../app/src/data-source/schema.js';
 
 // =============================================================================
 // TYPES
@@ -28,6 +32,7 @@ export type QueryIntent =
   | 'find_service'
   | 'find_team'
   | 'find_pattern'
+  | 'find_policy'
   | 'list_services'
   | 'list_consumers'
   | 'list_dependencies'
@@ -42,7 +47,7 @@ export interface QueryResult {
 }
 
 export interface QueryEntity {
-  type: 'service' | 'team' | 'person' | 'pattern' | 'department';
+  type: 'service' | 'team' | 'person' | 'pattern' | 'department' | 'policy';
   id: string;
   name: string;
   url: string;
@@ -73,6 +78,14 @@ const INTENT_PATTERNS: Array<{ pattern: RegExp; intent: QueryIntent }> = [
   { pattern: /\bpattern(s)?\b.*(for|about|implement)/i, intent: 'find_pattern' },
   { pattern: /\bhow\b.*(implement|do|build|create)/i, intent: 'find_pattern' },
   { pattern: /\bbest practice(s)?\b/i, intent: 'find_pattern' },
+
+  // Policy queries
+  { pattern: /\bpolic(y|ies)\b.*(for|about|affect|impact|govern|relate|apply)/i, intent: 'find_policy' },
+  { pattern: /\b(which|what)\b.*polic(y|ies)/i, intent: 'find_policy' },
+  { pattern: /\brules?\b.*(for|about|govern)/i, intent: 'find_policy' },
+  { pattern: /\bregulation(s)?\b/i, intent: 'find_policy' },
+  { pattern: /\bcompliance\b/i, intent: 'find_policy' },
+  { pattern: /\blegislation\b/i, intent: 'find_policy' },
 
   // List queries
   { pattern: /\b(list|show|all)\b.*services?\b/i, intent: 'list_services' },
@@ -447,6 +460,92 @@ function handleFindPattern(query: string): QueryResult {
   };
 }
 
+function handleFindPolicy(query: string): QueryResult {
+  const dept = extractDepartment(query);
+  const keywords = extractTopicKeywords(query);
+
+  let candidatePolicies = [...policies];
+
+  // Filter by department if mentioned
+  if (dept) {
+    candidatePolicies = candidatePolicies.filter(
+      p => p.leadDepartment === dept.id || p.affectedDepartments.includes(dept.id)
+    );
+  }
+
+  // Score by keyword matches
+  if (keywords.length > 0) {
+    const scored = candidatePolicies.map(p => {
+      const text = `${p.name} ${p.description} ${p.tags.join(' ')} ${p.category}`.toLowerCase();
+      const matches = keywords.filter(k => text.includes(k)).length;
+      return { policy: p, score: matches };
+    });
+    candidatePolicies = scored
+      .filter(x => x.score > 0)
+      .sort((a, b) => b.score - a.score)
+      .map(x => x.policy);
+  }
+
+  if (candidatePolicies.length === 0) {
+    return {
+      intent: 'find_policy',
+      confidence: 0.6,
+      response: `No matching policies found. Try browsing the policy catalogue or use different keywords.`,
+      entities: [],
+      suggestions: [
+        'Show policies for data sharing',
+        'What policies affect identity services',
+        'Show security policies',
+      ],
+    };
+  }
+
+  // Show top result with details
+  const top = candidatePolicies[0];
+  const others = candidatePolicies.slice(1, 4);
+
+  let response = `*${top.name}*\n`;
+  response += `${top.description}\n\n`;
+  response += `Category: ${top.category} | Status: ${top.status}\n`;
+  response += `Lead: ${top.leadDepartment.toUpperCase()} | Affects: ${top.affectedDepartments.map(d => d.toUpperCase()).join(', ')}\n`;
+
+  if (top.relatedServices.length > 0) {
+    const serviceNames = top.relatedServices
+      .map(sid => services.find(s => s.id === sid)?.name)
+      .filter(Boolean)
+      .slice(0, 3);
+    response += `Related services: ${serviceNames.join(', ')}`;
+    if (top.relatedServices.length > 3) {
+      response += ` (+${top.relatedServices.length - 3} more)`;
+    }
+  }
+
+  if (others.length > 0) {
+    response += `\n\n_Other related policies:_ ${others.map(p => p.name).join(', ')}`;
+  }
+
+  return {
+    intent: 'find_policy',
+    confidence: 0.85,
+    response,
+    entities: [{
+      type: 'policy',
+      id: top.id,
+      name: top.name,
+      url: `/policies/${top.id}`,
+      metadata: {
+        category: top.category,
+        status: top.status,
+        lead: top.leadDepartment,
+      },
+    }],
+    suggestions: [
+      `What services does ${top.name} affect`,
+      `Show related policies`,
+    ],
+  };
+}
+
 function handleListServices(query: string): QueryResult {
   const dept = extractDepartment(query);
   const serviceType = extractServiceType(query);
@@ -533,6 +632,16 @@ function handleGeneralSearch(query: string): QueryResult {
     )
     .forEach(p => results.push({ type: 'person', id: p.id, name: p.name, description: p.role }));
 
+  // Search policies
+  policies
+    .filter(p =>
+      p.name.toLowerCase().includes(q) ||
+      p.description.toLowerCase().includes(q) ||
+      p.tags.some(t => t.toLowerCase().includes(q)) ||
+      p.category.toLowerCase().includes(q)
+    )
+    .forEach(p => results.push({ type: 'policy', id: p.id, name: p.name, description: p.description }));
+
   if (results.length === 0) {
     return {
       intent: 'general_search',
@@ -562,6 +671,7 @@ function handleGeneralSearch(query: string): QueryResult {
       url: r.type === 'service' ? `/services/${r.id}` :
            r.type === 'pattern' ? `/patterns/${r.id}` :
            r.type === 'team' ? `/teams/${r.id}` :
+           r.type === 'policy' ? `/policies/${r.id}` :
            `/people/${r.id}`,
     })),
   };
@@ -583,6 +693,8 @@ export async function processSlackQuery(query: string): Promise<QueryResult> {
       return handleFindTeam(query);
     case 'find_pattern':
       return handleFindPattern(query);
+    case 'find_policy':
+      return handleFindPolicy(query);
     case 'list_services':
       return handleListServices(query);
     case 'list_consumers':

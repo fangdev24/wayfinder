@@ -1,9 +1,9 @@
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { getPersonByWebId, getServiceById, getTeamById } from '@/lib/data';
-import { PersonProfile } from '@/components/solid/PersonProfile';
-import { ServiceCard } from '@/components/cards/ServiceCard';
+import { getExtendedPersonByWebId } from '@/data-source/people-extended';
 import { PodIndicator } from '@/components/solid/PodIndicator';
+import { PersonProfileWithAccess } from '@/components/solid/PersonProfileWithAccess';
 
 interface PersonPageProps {
   params: Promise<{ webId: string }>;
@@ -27,14 +27,20 @@ export async function generateMetadata({ params }: PersonPageProps) {
 export default async function PersonPage({ params }: PersonPageProps) {
   const { webId } = await params;
   const decodedWebId = decodeURIComponent(webId);
-  const person = getPersonByWebId(decodedWebId);
+  const basePerson = getPersonByWebId(decodedWebId);
 
-  if (!person) {
+  if (!basePerson) {
     notFound();
   }
 
-  const team = getTeamById(person.teamId);
-  const maintainedServices = person.maintains
+  // Get extended person data with protected fields
+  const extendedPerson = getExtendedPersonByWebId(decodedWebId);
+  if (!extendedPerson) {
+    notFound();
+  }
+
+  const team = getTeamById(basePerson.teamId);
+  const maintainedServices = basePerson.maintains
     .map((serviceId) => getServiceById(serviceId))
     .filter(Boolean);
 
@@ -61,7 +67,7 @@ export default async function PersonPage({ params }: PersonPageProps) {
             </li>
           )}
           <li className="govuk-breadcrumbs__list-item" aria-current="page">
-            {person.name}
+            {basePerson.name}
           </li>
         </ol>
       </nav>
@@ -70,75 +76,18 @@ export default async function PersonPage({ params }: PersonPageProps) {
       <div className="govuk-grid-row govuk-!-margin-top-6">
         <div className="govuk-grid-column-full">
           <PodIndicator
-            message={`This profile is fetched from ${person.name}'s personal Solid Pod, not our database`}
-            webId={person.webId}
+            message={`This profile is fetched from ${basePerson.name}'s personal Solid Pod with access-controlled fields`}
+            webId={basePerson.webId}
           />
         </div>
       </div>
 
-      {/* Person Profile - Fetched from Solid Pod */}
-      <div className="govuk-grid-row govuk-!-margin-top-4">
-        <div className="govuk-grid-column-two-thirds">
-          <PersonProfile webId={person.webId} fallbackData={person} />
-        </div>
-
-        <div className="govuk-grid-column-one-third">
-          <h2 className="govuk-heading-s">Contact</h2>
-          <p className="govuk-body">
-            <a href={`mailto:${person.email}`} className="govuk-link">
-              {person.email}
-            </a>
-          </p>
-
-          {team && (
-            <>
-              <h2 className="govuk-heading-s govuk-!-margin-top-4">Team</h2>
-              <p className="govuk-body">
-                <Link href={`/teams/${team.id}`} className="govuk-link">
-                  {team.name}
-                </Link>
-              </p>
-              <p className="govuk-body">
-                Slack: <code>{team.slack}</code>
-              </p>
-            </>
-          )}
-        </div>
-      </div>
-
-      {/* Skills */}
-      <div className="govuk-grid-row govuk-!-margin-top-6">
-        <div className="govuk-grid-column-two-thirds">
-          <h2 className="govuk-heading-m">Skills</h2>
-          <ul className="govuk-list">
-            {person.skills.map((skill) => (
-              <li key={skill}>
-                <span className="govuk-tag govuk-tag--grey govuk-!-margin-right-2 govuk-!-margin-bottom-2">
-                  {skill}
-                </span>
-              </li>
-            ))}
-          </ul>
-        </div>
-      </div>
-
-      {/* Services Maintained */}
-      {maintainedServices.length > 0 && (
-        <div className="govuk-grid-row govuk-!-margin-top-8">
-          <div className="govuk-grid-column-full">
-            <h2 className="govuk-heading-m">
-              Maintains ({maintainedServices.length} services)
-            </h2>
-            <div className="wayfinder-grid wayfinder-grid--2-col">
-              {maintainedServices.map((service) =>
-                service ? (
-                  <ServiceCard key={service.id} service={service} compact />
-                ) : null
-              )}
-            </div>
-          </div>
-        </div>
-      )}
+      {/* Person Profile with Access Control */}
+      <PersonProfileWithAccess
+        person={extendedPerson}
+        team={team}
+        maintainedServices={maintainedServices}
+      />
 
       {/* WebID Info - For Demo */}
       <div className="govuk-grid-row govuk-!-margin-top-8">
@@ -156,17 +105,18 @@ export default async function PersonPage({ params }: PersonPageProps) {
               </p>
               <p>
                 <strong>WebID:</strong>{' '}
-                <code className="govuk-!-font-size-14">{person.webId}</code>
+                <code className="govuk-!-font-size-14">{basePerson.webId}</code>
               </p>
               <p>
                 In production, this would be hosted on{' '}
-                <code>{person.departmentId.toUpperCase()}&apos;s Pod server</code>,
+                <code>{basePerson.departmentId.toUpperCase()}&apos;s Pod server</code>,
                 giving the department full control over their staff data.
               </p>
               <p>
-                <strong>Key point:</strong> {person.name} owns this data.
+                <strong>Key point:</strong> {basePerson.name} owns this data.
                 They can update it, control who sees it, and revoke access -
-                without asking Wayfinder.
+                without asking Wayfinder. The Pod automatically reveals more fields
+                based on your verified identity attributes.
               </p>
             </div>
           </details>

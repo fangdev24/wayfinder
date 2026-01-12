@@ -8,6 +8,7 @@ const navigation = [
   { href: '/graph', label: 'Knowledge Graph' },
   { href: '/services', label: 'Services' },
   { href: '/patterns', label: 'Patterns' },
+  { href: '/compare', label: 'Compare' },
   { href: '/about', label: 'About' },
 ];
 
