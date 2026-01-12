@@ -2,7 +2,15 @@
 
 ## Status
 
-**Proposed** - Awaiting review and discussion
+**Implemented** - Completed 2026-01-12
+
+Implementation includes:
+- 5 demo agents (wayfinder-discovery, deploy-bot-revenue, policy-enforcer, ministerial-triage-dcs, ministerial-triage-rts)
+- Full schema with capabilities, permissions, and audit types
+- Agent registry UI at `/agents` and `/agents/[id]`
+- Query engine integration (web + Slack bot)
+- Knowledge graph integration with agent nodes
+- Agent lineage tracking for cloned agents
 
 ## Context
 
