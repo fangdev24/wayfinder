@@ -1,9 +1,10 @@
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
-import { getTeamById, getServicesByTeam, getPeopleByTeam } from '@/lib/data';
+import { getTeamById, getServicesByTeam, getPeopleByTeam, getAgentsByTeam } from '@/lib/data';
 import { TeamCard } from '@/components/cards/TeamCard';
 import { ServiceCard } from '@/components/cards/ServiceCard';
 import { PersonCard } from '@/components/cards/PersonCard';
+import { AgentCard } from '@/components/cards/AgentCard';
 import { PodIndicator } from '@/components/solid/PodIndicator';
 
 interface TeamPageProps {
@@ -34,6 +35,7 @@ export default async function TeamPage({ params }: TeamPageProps) {
 
   const services = getServicesByTeam(id);
   const members = getPeopleByTeam(id);
+  const teamAgents = getAgentsByTeam(id);
 
   return (
     <>
@@ -123,6 +125,23 @@ export default async function TeamPage({ params }: TeamPageProps) {
           </div>
         </div>
       </div>
+
+      {/* Agents Operated */}
+      {teamAgents.length > 0 && (
+        <div className="govuk-grid-row govuk-!-margin-top-8">
+          <div className="govuk-grid-column-full">
+            <h2 className="govuk-heading-m">Agents Operated ({teamAgents.length})</h2>
+            <p className="govuk-body govuk-!-margin-bottom-4">
+              AI agents and automation bots owned and operated by this team.
+            </p>
+            <div className="wayfinder-grid wayfinder-grid--2-col">
+              {teamAgents.map((agent) => (
+                <AgentCard key={agent.id} agent={agent} />
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* View in Graph */}
       <div className="govuk-grid-row govuk-!-margin-top-8">

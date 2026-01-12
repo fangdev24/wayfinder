@@ -1,0 +1,79 @@
+=== VERIFICATION RUN: agent-architecture ===
+Date: 2026-01-12 10:36
+Mode: Full
+
+=== LINT ===
+Duration: 14.0s
+Exit Code: 1
+
+/home/kasm/projects/wayfinder/app/src/app/admin/(authenticated)/layout.tsx
+  42:15  error  Do not use an `<a>` element to navigate to `/`. Use `<Link />` from `next/link` instead.
+
+/home/kasm/projects/wayfinder/app/src/app/admin/sign-in/page.tsx
+  198:15  error  Do not use an `<a>` element to navigate to `/`. Use `<Link />` from `next/link` instead.
+
+/home/kasm/projects/wayfinder/app/src/app/page.tsx
+  2:10  warning  'SearchBox' is defined but never used
+
+/home/kasm/projects/wayfinder/app/src/app/patterns/[id]/page.tsx
+  4:10  warning  'PatternCard' is defined but never used
+
+/home/kasm/projects/wayfinder/app/src/app/patterns/page.tsx
+  3:10  warning  'PatternCard' is defined but never used
+
+/home/kasm/projects/wayfinder/app/src/app/teams/[id]/page.tsx
+  4:10  warning  'TeamCard' is defined but never used
+
+/home/kasm/projects/wayfinder/app/src/components/admin/AdminHeader.tsx
+  60:17  error  Do not use an `<a>` element to navigate to `/`. Use `<Link />` from `next/link` instead.
+
+/home/kasm/projects/wayfinder/app/src/components/admin/forms/ServiceForm.tsx
+  389:9  error  Do not use an `<a>` element to navigate to `/admin/services/`. Use `<Link />` from `next/link` instead.
+
+/home/kasm/projects/wayfinder/app/src/components/admin/forms/TeamForm.tsx
+  247:9  error  Do not use an `<a>` element to navigate to `/admin/teams/`. Use `<Link />` from `next/link` instead.
+
+/home/kasm/projects/wayfinder/app/src/components/graph/GraphCanvas.tsx
+    6:106  warning  'GraphEdge' is defined but never used
+  472:6    warning  React Hook useEffect has missing dependencies
+
+/home/kasm/projects/wayfinder/app/src/lib/agent-query.ts
+   27:3   warning  'getAgentsByType' is defined but never used
+  703:19  warning  'confidence' is assigned a value but never used
+
+/home/kasm/projects/wayfinder/app/src/lib/data.ts
+  25:21  warning  '_getServiceById' is defined but never used
+  26:30  warning  '_getServicesByDepartment' is defined but never used
+  27:24  warning  '_getServicesByTeam' is defined but never used
+  28:19  warning  '_getConsumers' is defined but never used
+  29:22  warning  '_getDependencies' is defined but never used
+
+Total: 18 problems (5 errors, 13 warnings)
+
+=== TYPECHECK ===
+Duration: 13.6s
+Exit Code: 0
+
+No type errors found.
+
+=== TEST ===
+Duration: 0.3s
+Exit Code: 1 (No test script configured)
+
+npm error Missing script: "test"
+
+=== BUILD ===
+Duration: 29.2s
+Exit Code: 0
+
+Next.js 16.1.1 (Turbopack)
+Build completed successfully.
+
+Route Summary:
+- Static pages: 14
+- Dynamic pages: 24
+- Total: 38 routes
+
+Warnings: Sass deprecation warnings from govuk-frontend (external dependency)
+
+=== END VERIFICATION ===

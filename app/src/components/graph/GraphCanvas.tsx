@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState, useCallback, useMemo } from 'react';
 import * as d3 from 'd3';
 import { useRouter } from 'next/navigation';
-import { getGraphData, getServiceById, getPatternById, getPolicyById, type GraphNode, type GraphEdge } from '@/lib/data';
+import { getGraphData, getServiceById, getPatternById, getPolicyById, getAgentById, type GraphNode, type GraphEdge } from '@/lib/data';
 import { useGraphFilters } from './GraphContext';
 
 // Department colours matching the legend
@@ -16,6 +16,7 @@ const DEPARTMENT_COLOURS: Record<string, string> = {
   nhds: '#005eb8',
   patterns: '#505a5f',
   policies: '#6f72af',
+  agents: '#0b0c0c',
 };
 
 interface SimNode extends d3.SimulationNodeDatum, GraphNode {
@@ -69,16 +70,21 @@ export function GraphCanvas() {
   const filteredData = useMemo(() => {
     const { nodes: rawNodes, edges: rawEdges } = getGraphData();
 
-    // Filter nodes
-    const filteredNodes = rawNodes.filter(node => {
-      // Filter by node type
+    // Helper to check if a node passes type filters
+    const passesTypeFilter = (node: GraphNode) => {
       if (node.type === 'service' && !filters.showServices) return false;
       if (node.type === 'pattern' && !filters.showPatterns) return false;
       if (node.type === 'policy' && !filters.showPolicies) return false;
+      if (node.type === 'agent' && !filters.showAgents) return false;
+      return true;
+    };
 
-      // Filter by department
+    // Step 1: Get "primary" nodes (nodes belonging to selected department)
+    const primaryNodes = rawNodes.filter(node => {
+      if (!passesTypeFilter(node)) return false;
+
       if (filters.selectedDepartment !== 'all') {
-        // Patterns and policies don't have departments in the same way, so show them when their type is enabled
+        // Patterns and policies don't have departments, show them when type is enabled
         if (node.type === 'pattern') return true;
         if (node.type === 'policy') return true;
         if (node.department !== filters.selectedDepartment) return false;
@@ -86,6 +92,33 @@ export function GraphCanvas() {
 
       return true;
     });
+
+    const primaryNodeIds = new Set(primaryNodes.map(n => n.id));
+
+    // Step 2: When filtering by department, also include external nodes with cross-department connections
+    let filteredNodes = [...primaryNodes];
+
+    if (filters.selectedDepartment !== 'all') {
+      // Find cross-department edges connected to our primary nodes
+      const crossDeptEdges = rawEdges.filter(edge =>
+        edge.crossDepartment &&
+        (primaryNodeIds.has(edge.source) || primaryNodeIds.has(edge.target))
+      );
+
+      // Collect external node IDs from these edges
+      const externalNodeIds = new Set<string>();
+      crossDeptEdges.forEach(edge => {
+        if (!primaryNodeIds.has(edge.source)) externalNodeIds.add(edge.source);
+        if (!primaryNodeIds.has(edge.target)) externalNodeIds.add(edge.target);
+      });
+
+      // Add external nodes (still respecting type filters)
+      const externalNodes = rawNodes.filter(node =>
+        externalNodeIds.has(node.id) && passesTypeFilter(node)
+      );
+
+      filteredNodes = [...primaryNodes, ...externalNodes];
+    }
 
     // Get set of visible node IDs for edge filtering
     const visibleNodeIds = new Set(filteredNodes.map(n => n.id));
@@ -207,7 +240,7 @@ export function GraphCanvas() {
 
     // Create arrow markers for directed edges
     svg.append('defs').selectAll('marker')
-      .data(['consumes', 'depends-on', 'implements', 'governs', 'requires'])
+      .data(['consumes', 'depends-on', 'implements', 'governs', 'requires', 'agent-consumes'])
       .enter().append('marker')
       .attr('id', d => `arrow-${d}`)
       .attr('viewBox', '0 -5 10 10')
@@ -220,12 +253,13 @@ export function GraphCanvas() {
       .attr('fill', d => {
         if (d === 'implements') return '#b1b4b6';
         if (d === 'governs' || d === 'requires') return '#6f72af';
+        if (d === 'agent-consumes') return '#0b7285';
         return '#505a5f';
       })
       .attr('d', 'M0,-5L10,0L0,5');
 
     // Calculate cluster centers for each department (arranged in a circle)
-    const groups = ['dso', 'dcs', 'rts', 'bia', 'vla', 'nhds', 'patterns', 'policies'];
+    const groups = ['dso', 'dcs', 'rts', 'bia', 'vla', 'nhds', 'patterns', 'policies', 'agents'];
     const clusterCenters: Record<string, { x: number; y: number }> = {};
     groups.forEach((group, i) => {
       const angle = (i / groups.length) * 2 * Math.PI - Math.PI / 2;
@@ -267,6 +301,7 @@ export function GraphCanvas() {
         if (d.crossDepartment) return '#d4351c';
         if (d.type === 'implements') return '#b1b4b6';
         if (d.type === 'governs' || d.type === 'requires') return '#6f72af';
+        if (d.type === 'agent-consumes') return '#0b7285';
         return '#505a5f';
       })
       .attr('stroke-width', d => d.crossDepartment ? 2 : 1)
@@ -328,6 +363,18 @@ export function GraphCanvas() {
         });
         el.append('polygon')
           .attr('points', hexPoints.map(p => p.join(',')).join(' '))
+          .attr('fill', color)
+          .attr('stroke', '#0b0c0c')
+          .attr('stroke-width', 1);
+      } else if (d.type === 'agent') {
+        // Rounded square for agents (autonomous actors)
+        el.append('rect')
+          .attr('width', 18)
+          .attr('height', 18)
+          .attr('x', -9)
+          .attr('y', -9)
+          .attr('rx', 4)
+          .attr('ry', 4)
           .attr('fill', color)
           .attr('stroke', '#0b0c0c')
           .attr('stroke-width', 1);
@@ -429,6 +476,8 @@ export function GraphCanvas() {
           router.push(`/patterns/${d.id}`);
         } else if (d.type === 'policy') {
           router.push(`/policies/${d.id}`);
+        } else if (d.type === 'agent') {
+          router.push(`/agents/${d.id}`);
         }
       });
 
@@ -491,6 +540,8 @@ export function GraphCanvas() {
       return getPatternById(selectedNode.id);
     } else if (selectedNode.type === 'policy') {
       return getPolicyById(selectedNode.id);
+    } else if (selectedNode.type === 'agent') {
+      return getAgentById(selectedNode.id);
     }
     return null;
   };
@@ -560,7 +611,7 @@ export function GraphCanvas() {
           <strong>{tooltipData.node.label}</strong>
           <br />
           <span style={{ color: '#505a5f' }}>
-            {tooltipData.node.type === 'service' ? 'Service' : tooltipData.node.type === 'pattern' ? 'Pattern' : 'Policy'}
+            {tooltipData.node.type === 'service' ? 'Service' : tooltipData.node.type === 'pattern' ? 'Pattern' : tooltipData.node.type === 'policy' ? 'Policy' : 'Agent'}
             {tooltipData.node.department && ` • ${tooltipData.node.department.toUpperCase()}`}
           </span>
           <br />
@@ -631,6 +682,8 @@ export function GraphCanvas() {
                 router.push(`/patterns/${selectedNode.id}`);
               } else if (selectedNode.type === 'policy') {
                 router.push(`/policies/${selectedNode.id}`);
+              } else if (selectedNode.type === 'agent') {
+                router.push(`/agents/${selectedNode.id}`);
               }
             }}
           >

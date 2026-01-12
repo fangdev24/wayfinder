@@ -18,6 +18,7 @@ import {
   policies,
   relationships,
   people,
+  agents,
   stats,
   solidConfig,
   // Service helpers
@@ -38,6 +39,15 @@ import {
   getPoliciesAffectingService as _getPoliciesAffectingService,
   getRelatedPolicies as _getRelatedPolicies,
   getPoliciesByCategory as _getPoliciesByCategory,
+  // Agent helpers
+  getAgentById as _getAgentById,
+  getAgentByWebId as _getAgentByWebId,
+  getAgentsByDepartment as _getAgentsByDepartment,
+  getAgentsByTeam as _getAgentsByTeam,
+  getAgentsByType as _getAgentsByType,
+  getAgentsConsumingService as _getAgentsConsumingService,
+  getAgentsByStatus as _getAgentsByStatus,
+  searchAgents as _searchAgents,
 } from '@/data-source';
 
 // Re-export data collections
@@ -50,6 +60,7 @@ export {
   policies,
   relationships,
   people,
+  agents,
   stats,
   solidConfig,
 };
@@ -75,6 +86,14 @@ export type {
   Policy,
   PolicyCategory,
   PolicyStatus,
+  // Agent types
+  Agent,
+  AgentType,
+  AgentStatus,
+  AgentCapability,
+  AgentPermission,
+  PermissionCondition,
+  AgentAuditEntry,
 } from '@/data-source/schema';
 
 // ============================================================================
@@ -122,6 +141,19 @@ export const getPoliciesByDepartment = _getPoliciesByDepartment;
 export const getPoliciesAffectingService = _getPoliciesAffectingService;
 export const getRelatedPolicies = _getRelatedPolicies;
 export const getPoliciesByCategory = _getPoliciesByCategory;
+
+// ============================================================================
+// AGENT HELPERS
+// ============================================================================
+
+export const getAgentById = _getAgentById;
+export const getAgentByWebId = _getAgentByWebId;
+export const getAgentsByDepartment = _getAgentsByDepartment;
+export const getAgentsByTeam = _getAgentsByTeam;
+export const getAgentsByType = _getAgentsByType;
+export const getAgentsConsumingService = _getAgentsConsumingService;
+export const getAgentsByStatus = _getAgentsByStatus;
+export const searchAgents = _searchAgents;
 
 // ============================================================================
 // DEPARTMENT HELPERS
@@ -200,7 +232,7 @@ export function getCrossDepartmentRelationships() {
 // ============================================================================
 
 export interface SearchFilters {
-  type?: 'service' | 'pattern' | 'team' | 'person';
+  type?: 'service' | 'pattern' | 'team' | 'person' | 'agent';
   department?: string;
   status?: string;
   category?: string;
@@ -209,7 +241,7 @@ export interface SearchFilters {
 export function searchAll(query: string, filters?: SearchFilters) {
   const q = query.toLowerCase();
   const results: Array<{
-    type: 'service' | 'pattern' | 'team' | 'person';
+    type: 'service' | 'pattern' | 'team' | 'person' | 'agent';
     id: string;
     name: string;
     description: string;
@@ -303,6 +335,29 @@ export function searchAll(query: string, filters?: SearchFilters) {
       });
   }
 
+  // Search agents
+  if (!filters?.type || filters.type === 'agent') {
+    agents
+      .filter((a) => {
+        if (filters?.department && a.departmentId !== filters.department) return false;
+        if (filters?.status && a.status !== filters.status) return false;
+        return (
+          a.name.toLowerCase().includes(q) ||
+          a.description.toLowerCase().includes(q) ||
+          a.tags.some((t) => t.toLowerCase().includes(q))
+        );
+      })
+      .forEach((a) => {
+        results.push({
+          type: 'agent',
+          id: a.id,
+          name: a.name,
+          description: a.description,
+          department: a.departmentId,
+        });
+      });
+  }
+
   return results;
 }
 
@@ -312,7 +367,7 @@ export function searchAll(query: string, filters?: SearchFilters) {
 
 export interface GraphNode {
   id: string;
-  type: 'department' | 'team' | 'service' | 'pattern' | 'policy';
+  type: 'department' | 'team' | 'service' | 'pattern' | 'policy' | 'agent';
   label: string;
   department?: string;
   group?: string;
@@ -358,6 +413,17 @@ export function getGraphData() {
       label: p.name,
       department: p.leadDepartment,
       group: 'policies',
+    });
+  });
+
+  // Add agent nodes
+  agents.forEach((a) => {
+    nodes.push({
+      id: a.id,
+      type: 'agent',
+      label: a.name,
+      department: a.departmentId,
+      group: 'agents',
     });
   });
 
@@ -428,6 +494,21 @@ export function getGraphData() {
           source: p.id,
           target: relatedPolicyId,
           type: 'requires',
+        });
+      }
+    });
+  });
+
+  // Add agent -> service consumption edges (distinct type for styling)
+  agents.forEach((a) => {
+    a.consumesServices.forEach((serviceId) => {
+      if (nodeIds.has(serviceId)) {
+        const service = getServiceById(serviceId);
+        edges.push({
+          source: a.id,
+          target: serviceId,
+          type: 'agent-consumes',
+          crossDepartment: service ? service.departmentId !== a.departmentId : false,
         });
       }
     });

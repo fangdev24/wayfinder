@@ -161,7 +161,7 @@ export function AgentQueryInterface() {
 
   const exampleQueries = [
     'Who runs the API for revenue and tax',
-    'Show me authentication patterns',
+    'What agents handle correspondence',
     'List services in citizen support',
     'What team maintains identity verification',
   ];

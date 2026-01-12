@@ -7,10 +7,12 @@ import {
   getTeamById,
   getPeopleByTeam,
   getPatternById,
+  getAgentsConsumingService,
 } from '@/lib/data';
 import { ServiceCard } from '@/components/cards/ServiceCard';
 import { PersonCard } from '@/components/cards/PersonCard';
 import { PatternCard } from '@/components/cards/PatternCard';
+import { AgentCard } from '@/components/cards/AgentCard';
 
 interface ServicePageProps {
   params: Promise<{ id: string }>;
@@ -45,6 +47,7 @@ export default async function ServicePage({ params }: ServicePageProps) {
   const patterns = service.relatedPatterns
     .map((pid) => getPatternById(pid))
     .filter(Boolean);
+  const agentConsumers = getAgentsConsumingService(id);
 
   return (
     <>
@@ -210,6 +213,25 @@ export default async function ServicePage({ params }: ServicePageProps) {
                   <PatternCard key={pattern.id} pattern={pattern} compact />
                 ) : null
               )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Agent Consumers */}
+      {agentConsumers.length > 0 && (
+        <div className="govuk-grid-row govuk-!-margin-top-8">
+          <div className="govuk-grid-column-full">
+            <h2 className="govuk-heading-m">
+              Agent consumers ({agentConsumers.length})
+            </h2>
+            <p className="govuk-body govuk-!-margin-bottom-4">
+              AI agents that use this service.
+            </p>
+            <div className="wayfinder-grid wayfinder-grid--2-col">
+              {agentConsumers.map((agent) => (
+                <AgentCard key={agent.id} agent={agent} compact />
+              ))}
             </div>
           </div>
         </div>

@@ -156,6 +156,37 @@ export const relationships: Relationship[] = [
   { id: 'rel-408', sourceId: 'mtls-everywhere', sourceType: 'pattern', targetId: 'secrets-management', targetType: 'pattern', relationshipType: 'related-to' },
   { id: 'rel-409', sourceId: 'async-notifications', sourceType: 'pattern', targetId: 'webhook-patterns', targetType: 'pattern', relationshipType: 'related-to' },
   { id: 'rel-410', sourceId: 'idempotency-keys', sourceType: 'pattern', targetId: 'webhook-patterns', targetType: 'pattern', relationshipType: 'related-to' },
+
+  // =========================================================================
+  // AGENT -> TEAM (owned-by)
+  // Every agent has a clear owning team for accountability
+  // =========================================================================
+  { id: 'rel-500', sourceId: 'wayfinder-discovery', sourceType: 'agent', targetId: 'granite-platform', targetType: 'team', relationshipType: 'owned-by' },
+  { id: 'rel-501', sourceId: 'deploy-bot-revenue', sourceType: 'agent', targetId: 'falcon-core', targetType: 'team', relationshipType: 'owned-by' },
+  { id: 'rel-502', sourceId: 'policy-enforcer', sourceType: 'agent', targetId: 'granite-platform', targetType: 'team', relationshipType: 'owned-by' },
+  { id: 'rel-503', sourceId: 'ministerial-triage-dcs', sourceType: 'agent', targetId: 'puffin-delivery', targetType: 'team', relationshipType: 'owned-by' },
+
+  // =========================================================================
+  // AGENT -> SERVICE (consumes)
+  // Agents consume services to perform their functions
+  // =========================================================================
+
+  // wayfinder-discovery consumes: neptune-graph, opensearch-index
+  { id: 'rel-510', sourceId: 'wayfinder-discovery', sourceType: 'agent', targetId: 'neptune-graph', targetType: 'service', relationshipType: 'consumes', metadata: { purpose: 'Knowledge graph queries' } },
+  { id: 'rel-511', sourceId: 'wayfinder-discovery', sourceType: 'agent', targetId: 'opensearch-index', targetType: 'service', relationshipType: 'consumes', metadata: { purpose: 'Full-text search' } },
+
+  // deploy-bot-revenue consumes: gov-cloud-platform, github-actions, slack-notifications
+  { id: 'rel-520', sourceId: 'deploy-bot-revenue', sourceType: 'agent', targetId: 'cloud-platform', targetType: 'service', relationshipType: 'consumes', metadata: { purpose: 'Deployment target' } },
+  { id: 'rel-521', sourceId: 'deploy-bot-revenue', sourceType: 'agent', targetId: 'github-actions', targetType: 'service', relationshipType: 'consumes', metadata: { purpose: 'CI/CD pipelines' } },
+  { id: 'rel-522', sourceId: 'deploy-bot-revenue', sourceType: 'agent', targetId: 'gov-notify', targetType: 'service', relationshipType: 'consumes', metadata: { purpose: 'Deployment notifications' } },
+
+  // policy-enforcer consumes: wayfinder-api, policy-registry, notification-service
+  { id: 'rel-530', sourceId: 'policy-enforcer', sourceType: 'agent', targetId: 'api-gateway', targetType: 'service', relationshipType: 'consumes', metadata: { purpose: 'Service registry access' } },
+  { id: 'rel-531', sourceId: 'policy-enforcer', sourceType: 'agent', targetId: 'gov-notify', targetType: 'service', relationshipType: 'consumes', metadata: { purpose: 'Compliance notifications' } },
+
+  // ministerial-triage-dcs consumes: email-gateway, document-classification-api, bedrock-claude, staff-directory
+  { id: 'rel-540', sourceId: 'ministerial-triage-dcs', sourceType: 'agent', targetId: 'gov-notify', targetType: 'service', relationshipType: 'consumes', metadata: { purpose: 'Email access via Notify' } },
+  { id: 'rel-541', sourceId: 'ministerial-triage-dcs', sourceType: 'agent', targetId: 'case-management', targetType: 'service', relationshipType: 'consumes', metadata: { purpose: 'Correspondence routing' } },
 ];
 
 export default relationships;

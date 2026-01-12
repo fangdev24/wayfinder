@@ -182,6 +182,128 @@ export type PolicyStatus =
   | 'superseded';
 
 // ============================================================================
+// AGENTS
+// ============================================================================
+
+/**
+ * Agent type classifications for government AI/automation agents
+ */
+export type AgentType =
+  | 'discovery'      // Helps find information
+  | 'operations'     // Automates operations
+  | 'compliance'     // Enforces policies
+  | 'data'           // Manages data flows
+  | 'intelligence'   // AI-powered analysis
+  | 'support';       // Departmental operations (comms, casework, private office)
+
+/**
+ * Agent lifecycle status
+ */
+export type AgentStatus =
+  | 'active'         // Running in production
+  | 'testing'        // In testing/staging
+  | 'suspended'      // Temporarily disabled
+  | 'retired';       // No longer active
+
+/**
+ * A specific capability that an agent possesses
+ */
+export interface AgentCapability {
+  name: string;                    // e.g., "deploy_to_staging"
+  description: string;
+  riskLevel: 'low' | 'medium' | 'high';
+  requiresApproval: boolean;       // Needs human approval each time?
+}
+
+/**
+ * Permission condition for scoped agent access
+ */
+export interface PermissionCondition {
+  type: 'time_window' | 'approval_required' | 'rate_limit' | 'environment';
+  value: string;
+}
+
+/**
+ * Fine-grained permission granted to an agent
+ */
+export interface AgentPermission {
+  resource: string;                // Path pattern, e.g., "/deployments/*"
+  actions: ('read' | 'write' | 'delete' | 'execute')[];
+  conditions?: PermissionCondition[];
+}
+
+/**
+ * Agent identity - an autonomous entity that acts on behalf of a team
+ *
+ * Agents are first-class entities in Wayfinder, discoverable alongside
+ * services, teams, and patterns. They have clear ownership, governance,
+ * and audit trails.
+ */
+export interface Agent {
+  id: string;                      // e.g., "deploy-bot-granite"
+  webId: string;                   // Solid WebID for the agent
+  name: string;                    // Human-readable name
+  type: AgentType;
+
+  // Ownership
+  departmentId: string;            // Owning department
+  teamId: string;                  // Owning team
+
+  // Identity & Trust
+  description: string;             // What this agent does
+  version: string;                 // Agent version
+  sourceRepository?: string;       // Where agent code lives
+
+  // Capabilities
+  capabilities: AgentCapability[]; // What this agent can do
+  consumesServices: string[];      // Service IDs this agent uses
+
+  // Permissions (scoped)
+  permissions: AgentPermission[];  // Fine-grained permissions
+
+  // Status
+  status: AgentStatus;
+  createdAt: string;
+  lastActiveAt: string;
+
+  // Lifecycle
+  approvedBy: string;              // Who approved this agent
+  reviewDate: string;              // Next review date
+
+  // Lineage (for instanced/cloned agents)
+  clonedFrom?: string;             // WebID of parent agent this was derived from
+
+  // Tags for search
+  tags: string[];
+}
+
+/**
+ * Every agent action is logged for accountability
+ */
+export interface AgentAuditEntry {
+  id: string;
+  agentId: string;
+  agentWebId: string;
+
+  // What happened
+  action: string;                  // e.g., "deployed", "read", "modified"
+  resource: string;                // What was affected
+  timestamp: string;
+
+  // Context
+  triggeredBy: 'schedule' | 'event' | 'human_request';
+  requestedBy?: string;            // If human-triggered, who asked
+
+  // Outcome
+  outcome: 'success' | 'failure' | 'blocked';
+  reason?: string;                 // Especially for blocked actions
+
+  // Evidence
+  inputHash?: string;              // Hash of inputs for reproducibility
+  outputHash?: string;             // Hash of outputs
+}
+
+// ============================================================================
 // GRAPH RELATIONSHIPS
 // ============================================================================
 
@@ -200,17 +322,22 @@ export type EntityType =
   | 'team'
   | 'service'
   | 'pattern'
-  | 'policy';
+  | 'policy'
+  | 'agent';
 
 export type RelationshipType =
   | 'maintains'          // team -> service
   | 'belongs-to'         // team -> department
-  | 'consumes'           // service -> service
+  | 'consumes'           // service -> service, agent -> service
   | 'implements'         // service -> pattern
   | 'contributed-to'     // team -> pattern
   | 'related-to'         // any -> any
   | 'governs'            // policy -> service/department
-  | 'requires';          // policy -> policy
+  | 'requires'           // policy -> policy
+  | 'owned-by'           // agent -> team
+  | 'governed-by'        // agent -> policy
+  | 'delegates-to'       // agent -> agent
+  | 'reports-to';        // agent -> team
 
 // ============================================================================
 // SEARCH & DISCOVERY
@@ -291,6 +418,8 @@ export interface DemoDataset {
   // Solid integration
   people?: Person[];
   teamsWithSolid?: TeamWithSolid[];
+  // Agents
+  agents?: Agent[];
 }
 
 // ============================================================================

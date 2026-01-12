@@ -46,6 +46,7 @@ import { patterns } from './patterns';
 import { policies } from './policies';
 import { relationships } from './relationships';
 import { people } from './people';
+import { agents } from './agents';
 
 export const demoDataset: DemoDataset = {
   version: '1.2.0',
@@ -59,6 +60,7 @@ export const demoDataset: DemoDataset = {
   policies,
   relationships,
   people,
+  agents,
 };
 
 // Export individual collections
@@ -69,6 +71,7 @@ export { patterns } from './patterns';
 export { policies, getPolicyById, getPoliciesByDepartment, getPoliciesByCategory, getPoliciesAffectingService, getRelatedPolicies } from './policies';
 export { relationships } from './relationships';
 export { people, getPersonById, getPersonByWebId, getPeopleByTeam, getPeopleByDepartment, getMaintainersForService } from './people';
+export { agents, getAgentById, getAgentByWebId, getAgentsByDepartment, getAgentsByTeam, getAgentsByType, getAgentsConsumingService, getAgentsByStatus, searchAgents } from './agents';
 
 // Export types
 export type * from './schema';
@@ -88,6 +91,7 @@ export const stats = {
   patterns: patterns.length,
   policies: policies.length,
   relationships: relationships.length,
+  agents: agents.length,
 
   servicesByType: {
     api: services.filter((s) => s.type === 'api').length,
@@ -125,6 +129,24 @@ export const stats = {
     bia: people.filter((p) => p.departmentId === 'bia').length,
     vla: people.filter((p) => p.departmentId === 'vla').length,
     nhds: people.filter((p) => p.departmentId === 'nhds').length,
+  },
+
+  agentsByType: {
+    discovery: agents.filter((a) => a.type === 'discovery').length,
+    operations: agents.filter((a) => a.type === 'operations').length,
+    compliance: agents.filter((a) => a.type === 'compliance').length,
+    data: agents.filter((a) => a.type === 'data').length,
+    intelligence: agents.filter((a) => a.type === 'intelligence').length,
+    support: agents.filter((a) => a.type === 'support').length,
+  },
+
+  agentsByDepartment: {
+    dso: agents.filter((a) => a.departmentId === 'dso').length,
+    dcs: agents.filter((a) => a.departmentId === 'dcs').length,
+    rts: agents.filter((a) => a.departmentId === 'rts').length,
+    bia: agents.filter((a) => a.departmentId === 'bia').length,
+    vla: agents.filter((a) => a.departmentId === 'vla').length,
+    nhds: agents.filter((a) => a.departmentId === 'nhds').length,
   },
 };
 

@@ -6,7 +6,7 @@ export function StatsPanel() {
       <h2 className="govuk-heading-m">What&apos;s in Wayfinder</h2>
 
       <div className="govuk-grid-row">
-        <div className="govuk-grid-column-one-quarter">
+        <div className="govuk-grid-column-one-third">
           <div className="govuk-!-margin-bottom-4">
             <span className="govuk-heading-xl govuk-!-margin-bottom-1">
               {stats.departments}
@@ -15,7 +15,7 @@ export function StatsPanel() {
           </div>
         </div>
 
-        <div className="govuk-grid-column-one-quarter">
+        <div className="govuk-grid-column-one-third">
           <div className="govuk-!-margin-bottom-4">
             <span className="govuk-heading-xl govuk-!-margin-bottom-1">
               {stats.services}
@@ -24,7 +24,7 @@ export function StatsPanel() {
           </div>
         </div>
 
-        <div className="govuk-grid-column-one-quarter">
+        <div className="govuk-grid-column-one-third">
           <div className="govuk-!-margin-bottom-4">
             <span className="govuk-heading-xl govuk-!-margin-bottom-1">
               {stats.patterns}
@@ -32,8 +32,28 @@ export function StatsPanel() {
             <span className="govuk-body">Patterns</span>
           </div>
         </div>
+      </div>
 
-        <div className="govuk-grid-column-one-quarter">
+      <div className="govuk-grid-row">
+        <div className="govuk-grid-column-one-third">
+          <div className="govuk-!-margin-bottom-4">
+            <span className="govuk-heading-xl govuk-!-margin-bottom-1">
+              {stats.policies}
+            </span>
+            <span className="govuk-body">Policies</span>
+          </div>
+        </div>
+
+        <div className="govuk-grid-column-one-third">
+          <div className="govuk-!-margin-bottom-4">
+            <span className="govuk-heading-xl govuk-!-margin-bottom-1">
+              {stats.agents}
+            </span>
+            <span className="govuk-body">AI Agents</span>
+          </div>
+        </div>
+
+        <div className="govuk-grid-column-one-third">
           <div className="govuk-!-margin-bottom-4">
             <span className="govuk-heading-xl govuk-!-margin-bottom-1">
               {stats.people}

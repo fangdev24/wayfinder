@@ -84,6 +84,28 @@ export function GraphLegend() {
           </svg>
           Policy
         </li>
+        <li className="govuk-!-margin-bottom-1">
+          <svg
+            width="14"
+            height="14"
+            viewBox="0 0 14 14"
+            style={{ marginRight: '8px', verticalAlign: 'middle' }}
+            aria-hidden="true"
+          >
+            <rect
+              x="1"
+              y="1"
+              width="12"
+              height="12"
+              rx="3"
+              ry="3"
+              fill="#0b0c0c"
+              stroke="#0b0c0c"
+              strokeWidth="0.5"
+            />
+          </svg>
+          Agent
+        </li>
       </ul>
 
       {/* Edge Types */}
@@ -91,6 +113,9 @@ export function GraphLegend() {
       <ul className="govuk-list govuk-!-font-size-14">
         <li className="govuk-!-margin-bottom-1">
           <span style={{ color: '#505a5f' }}>―――</span> Depends on
+        </li>
+        <li className="govuk-!-margin-bottom-1">
+          <span style={{ color: '#0b7285' }}>―――</span> Agent consumes
         </li>
         <li className="govuk-!-margin-bottom-1">
           <span style={{ color: '#b1b4b6' }}>- - -</span> Implements pattern

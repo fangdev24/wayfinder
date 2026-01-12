@@ -16,17 +16,18 @@
 import {
   services,
   teams,
-  people,
   patterns,
   departments,
-  getServiceById,
+  agents,
   getTeamById,
   getMaintainersForService,
   getServicesByTeam,
   getServicesByDepartment,
-  getPeopleByDepartment,
+  getAgentsByDepartment,
+  getAgentsByType,
   searchAll,
 } from './data';
+import type { AgentType } from './data';
 
 // ============================================================================
 // TYPES
@@ -37,7 +38,9 @@ export type QueryIntent =
   | 'find_service'     // "what API...", "show me the service for..."
   | 'find_team'        // "what team...", "which team owns..."
   | 'find_pattern'     // "show me patterns for...", "how do I implement..."
+  | 'find_agent'       // "what agents...", "which bot..."
   | 'list_services'    // "what services does X have", "list services in..."
+  | 'list_agents'      // "show all agents", "list agents in..."
   | 'list_consumers'   // "who uses this API", "what services consume..."
   | 'list_dependencies' // "what does X depend on"
   | 'general_search';  // fallback to keyword search
@@ -51,7 +54,7 @@ export interface QueryResult {
 }
 
 export interface QueryEntity {
-  type: 'service' | 'team' | 'person' | 'pattern' | 'department';
+  type: 'service' | 'team' | 'person' | 'pattern' | 'department' | 'agent';
   id: string;
   name: string;
   url: string;
@@ -88,6 +91,14 @@ const INTENT_PATTERNS: Array<{ pattern: RegExp; intent: QueryIntent }> = [
   { pattern: /\bwhat\b.*services?\b.*(does|do|has|have)\b/i, intent: 'list_services' },
   { pattern: /\b(who|what)\b.*(uses?|consumes?|depends? on)/i, intent: 'list_consumers' },
   { pattern: /\bdependenc(y|ies)\b/i, intent: 'list_dependencies' },
+
+  // Agent queries
+  { pattern: /\b(what|which|show|find)\b.*(agent|bot)/i, intent: 'find_agent' },
+  { pattern: /\bagent(s)?\b.*(for|runs?|does|handles?)/i, intent: 'find_agent' },
+  { pattern: /\bbot(s)?\b.*(for|runs?|handles?)/i, intent: 'find_agent' },
+  { pattern: /\bwho\b.*(deploy|automat)/i, intent: 'find_agent' },
+  { pattern: /\b(list|show|all)\b.*agents?\b/i, intent: 'list_agents' },
+  { pattern: /\bwhat\b.*agents?\b.*(does|do|has|have|run)\b/i, intent: 'list_agents' },
 ];
 
 function detectIntent(query: string): { intent: QueryIntent; confidence: number } {
@@ -153,6 +164,20 @@ function extractServiceType(query: string): string | undefined {
   if (q.includes('platform')) return 'platform';
   if (q.includes('library') || q.includes('sdk')) return 'library';
   if (q.includes('event') || q.includes('stream')) return 'event-stream';
+  return undefined;
+}
+
+/**
+ * Extract agent type mentions from query
+ */
+function extractAgentType(query: string): AgentType | undefined {
+  const q = query.toLowerCase();
+  if (q.includes('discovery') || q.includes('search') || q.includes('find')) return 'discovery';
+  if (q.includes('deploy') || q.includes('operation') || q.includes('ci/cd')) return 'operations';
+  if (q.includes('compliance') || q.includes('policy') || q.includes('enforce')) return 'compliance';
+  if (q.includes('data') || q.includes('sync')) return 'data';
+  if (q.includes('intelligence') || q.includes('ai') || q.includes('analysis')) return 'intelligence';
+  if (q.includes('support') || q.includes('ministerial') || q.includes('correspondence')) return 'support';
   return undefined;
 }
 
@@ -509,6 +534,117 @@ function handleListServices(query: string): QueryResult {
   };
 }
 
+function handleFindAgent(query: string): QueryResult {
+  const dept = extractDepartment(query);
+  const agentType = extractAgentType(query);
+  const keywords = extractTopicKeywords(query);
+
+  let candidateAgents = agents;
+
+  if (dept) {
+    candidateAgents = getAgentsByDepartment(dept.id);
+  }
+
+  if (agentType) {
+    candidateAgents = candidateAgents.filter(a => a.type === agentType);
+  }
+
+  // Score by keyword matches
+  const scored = candidateAgents.map(a => {
+    let score = 0;
+    const searchText = `${a.name} ${a.description} ${a.tags.join(' ')}`.toLowerCase();
+    keywords.forEach(k => {
+      if (searchText.includes(k)) score += 1;
+    });
+    return { agent: a, score };
+  });
+
+  const sorted = scored.sort((a, b) => b.score - a.score);
+  const top = sorted[0]?.agent;
+
+  if (!top) {
+    return {
+      intent: 'find_agent',
+      confidence: 0.5,
+      response: `No agents found matching those criteria. Try "list all agents" to see what's available.`,
+      entities: [],
+    };
+  }
+
+  const team = getTeamById(top.teamId);
+  const deptInfo = departments.find(d => d.id === top.departmentId);
+
+  const response = `*${top.name}*\n\n` +
+    `${top.description}\n\n` +
+    `• *Type:* ${top.type}\n` +
+    `• *Status:* ${top.status}\n` +
+    `• *Owner:* ${team?.name ?? top.teamId} (${deptInfo?.acronym ?? top.departmentId})\n` +
+    `• *Version:* ${top.version}`;
+
+  return {
+    intent: 'find_agent',
+    confidence: 0.8,
+    response,
+    entities: [{
+      type: 'agent',
+      id: top.id,
+      name: top.name,
+      url: `/agents/${top.id}`,
+    }],
+    suggestions: [
+      `Show all agents in ${deptInfo?.acronym ?? top.departmentId}`,
+      `Show ${top.type} agents`,
+    ],
+  };
+}
+
+function handleListAgents(query: string): QueryResult {
+  const dept = extractDepartment(query);
+  const agentType = extractAgentType(query);
+
+  let results = agents;
+  let description = 'All agents';
+
+  if (dept) {
+    results = getAgentsByDepartment(dept.id);
+    description = `Agents in ${dept.name}`;
+  }
+
+  if (agentType) {
+    results = results.filter(a => a.type === agentType);
+    description += ` (${agentType})`;
+  }
+
+  if (results.length === 0) {
+    return {
+      intent: 'list_agents',
+      confidence: 0.7,
+      response: `No agents found matching those criteria.`,
+      entities: [],
+    };
+  }
+
+  const displayed = results.slice(0, 5);
+  let response = `*${description}* (${results.length} total)\n\n`;
+  response += displayed.map(a => `• *${a.name}* - ${a.description.substring(0, 60)}...`).join('\n');
+
+  if (results.length > 5) {
+    response += `\n\n_...and ${results.length - 5} more. See full agent listing._`;
+  }
+
+  return {
+    intent: 'list_agents',
+    confidence: 0.85,
+    response,
+    entities: displayed.map(a => ({
+      type: 'agent' as const,
+      id: a.id,
+      name: a.name,
+      url: `/agents/${a.id}`,
+    })),
+  };
+}
+
 function handleGeneralSearch(query: string): QueryResult {
   const results = searchAll(query);
 
@@ -522,6 +658,7 @@ function handleGeneralSearch(query: string): QueryResult {
         'List all services',
         'Show patterns for authentication',
         'Who maintains identity services',
+        'List all agents',
       ],
     };
   }
@@ -541,6 +678,7 @@ function handleGeneralSearch(query: string): QueryResult {
       url: r.type === 'service' ? `/services/${r.id}` :
            r.type === 'pattern' ? `/patterns/${r.id}` :
            r.type === 'team' ? `/teams/${r.id}` :
+           r.type === 'agent' ? `/agents/${r.id}` :
            `/people/${r.id}`,
     })),
   };
@@ -573,8 +711,12 @@ export function processQuery(query: string): QueryResult {
       return handleFindTeam(query);
     case 'find_pattern':
       return handleFindPattern(query);
+    case 'find_agent':
+      return handleFindAgent(query);
     case 'list_services':
       return handleListServices(query);
+    case 'list_agents':
+      return handleListAgents(query);
     case 'list_consumers':
     case 'list_dependencies':
       // TODO: Implement these
