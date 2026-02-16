@@ -47,12 +47,23 @@ export function StatsPanel() {
         <div className="govuk-grid-column-one-third">
           <div className="govuk-!-margin-bottom-4">
             <span className="govuk-heading-xl govuk-!-margin-bottom-1">
+              {stats.dataSharingAgreements}
+            </span>
+            <span className="govuk-body">Data Sharing Agreements</span>
+          </div>
+        </div>
+
+        <div className="govuk-grid-column-one-third">
+          <div className="govuk-!-margin-bottom-4">
+            <span className="govuk-heading-xl govuk-!-margin-bottom-1">
               {stats.agents}
             </span>
             <span className="govuk-body">AI Agents</span>
           </div>
         </div>
+      </div>
 
+      <div className="govuk-grid-row">
         <div className="govuk-grid-column-one-third">
           <div className="govuk-!-margin-bottom-4">
             <span className="govuk-heading-xl govuk-!-margin-bottom-1">

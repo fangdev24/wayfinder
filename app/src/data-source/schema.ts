@@ -304,6 +304,70 @@ export interface AgentAuditEntry {
 }
 
 // ============================================================================
+// DATA SHARING AGREEMENTS
+// ============================================================================
+
+/**
+ * Categories of data that can be shared between departments
+ */
+export type DataCategory =
+  | 'income'       // Income, earnings, tax data
+  | 'identity'     // Identity verification data
+  | 'health'       // Health and medical data
+  | 'benefits'     // Benefit entitlement data
+  | 'address'      // Address and location data
+  | 'employment'   // Employment status data
+  | 'other';       // Other data types
+
+/**
+ * Status of a data sharing agreement
+ */
+export type AgreementStatus =
+  | 'active'       // Agreement is in force
+  | 'draft'        // Under development
+  | 'expired'      // Past expiry date
+  | 'under-review'; // Being reviewed for renewal
+
+/**
+ * Formal data sharing agreement between government departments
+ *
+ * Data Sharing Agreements (DSAs) are the legal and governance layer
+ * that underpins cross-departmental data flows. While Wayfinder shows
+ * service-to-service dependencies, DSAs show the legal basis, data
+ * elements, and parties involved in data sharing arrangements.
+ */
+export interface DataSharingAgreement {
+  id: string;                        // e.g., "dsa-dcs-rts-income-2024"
+  name: string;                      // Human-readable title
+  description: string;               // Purpose and scope
+
+  // Parties (using existing department IDs)
+  providingDepartmentId: string;     // Who provides the data
+  consumingDepartmentId: string;     // Who receives the data
+
+  // Agreement details
+  reference: string;                 // e.g., "DSA-2024-0456"
+  legalBasis: string;                // e.g., "GDPR Article 6(1)(e)"
+  category: DataCategory;
+  status: AgreementStatus;
+
+  // Data elements being shared
+  dataElements: string[];            // e.g., ['national-insurance-number', 'income-bands']
+
+  // Relationships (IDs only, following existing pattern)
+  relatedServices: string[];         // Service IDs that implement this
+  relatedPolicies: string[];         // Policy IDs it complies with
+
+  // Lifecycle
+  effectiveDate: string;             // ISO date
+  reviewDate?: string;               // ISO date
+  expiryDate?: string;               // ISO date
+
+  // Metadata
+  tags: string[];
+}
+
+// ============================================================================
 // GRAPH RELATIONSHIPS
 // ============================================================================
 
@@ -323,7 +387,8 @@ export type EntityType =
   | 'service'
   | 'pattern'
   | 'policy'
-  | 'agent';
+  | 'agent'
+  | 'data-sharing-agreement';
 
 export type RelationshipType =
   | 'maintains'          // team -> service
@@ -337,7 +402,10 @@ export type RelationshipType =
   | 'owned-by'           // agent -> team
   | 'governed-by'        // agent -> policy
   | 'delegates-to'       // agent -> agent
-  | 'reports-to';        // agent -> team
+  | 'reports-to'         // agent -> team
+  | 'data-provider'      // data-sharing-agreement -> service (service provides data)
+  | 'data-consumer'      // data-sharing-agreement -> service (service consumes data)
+  | 'complies-with';     // data-sharing-agreement -> policy
 
 // ============================================================================
 // SEARCH & DISCOVERY
@@ -420,6 +488,8 @@ export interface DemoDataset {
   teamsWithSolid?: TeamWithSolid[];
   // Agents
   agents?: Agent[];
+  // Data Sharing Agreements
+  dataSharingAgreements?: DataSharingAgreement[];
 }
 
 // ============================================================================

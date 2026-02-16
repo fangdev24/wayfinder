@@ -19,15 +19,27 @@ import {
   patterns,
   departments,
   agents,
+  dataSharingAgreements,
   getTeamById,
   getMaintainersForService,
   getServicesByTeam,
   getServicesByDepartment,
   getAgentsByDepartment,
   getAgentsByType,
+  getAgreementsByDepartment,
+  getAgreementsByCategory,
   searchAll,
+  getDepartmentById,
 } from './data';
-import type { AgentType } from './data';
+import type { AgentType, DataCategory } from './data';
+import {
+  type UnifiedIdentity,
+  createPublicIdentity,
+  filterDSAList,
+  checkRolePermission,
+  logBatchAccessDecision,
+  type AuditContext,
+} from './access-control';
 
 // ============================================================================
 // TYPES
@@ -39,8 +51,10 @@ export type QueryIntent =
   | 'find_team'        // "what team...", "which team owns..."
   | 'find_pattern'     // "show me patterns for...", "how do I implement..."
   | 'find_agent'       // "what agents...", "which bot..."
+  | 'find_dsa'         // "what data sharing...", "do we have an agreement..."
   | 'list_services'    // "what services does X have", "list services in..."
   | 'list_agents'      // "show all agents", "list agents in..."
+  | 'list_dsas'        // "show all data sharing agreements"
   | 'list_consumers'   // "who uses this API", "what services consume..."
   | 'list_dependencies' // "what does X depend on"
   | 'general_search';  // fallback to keyword search
@@ -54,7 +68,7 @@ export interface QueryResult {
 }
 
 export interface QueryEntity {
-  type: 'service' | 'team' | 'person' | 'pattern' | 'department' | 'agent';
+  type: 'service' | 'team' | 'person' | 'pattern' | 'department' | 'agent' | 'data-sharing-agreement';
   id: string;
   name: string;
   url: string;
@@ -99,6 +113,15 @@ const INTENT_PATTERNS: Array<{ pattern: RegExp; intent: QueryIntent }> = [
   { pattern: /\bwho\b.*(deploy|automat)/i, intent: 'find_agent' },
   { pattern: /\b(list|show|all)\b.*agents?\b/i, intent: 'list_agents' },
   { pattern: /\bwhat\b.*agents?\b.*(does|do|has|have|run)\b/i, intent: 'list_agents' },
+
+  // Data sharing agreement queries
+  { pattern: /\b(data|sharing)\b.*(agreement|accord)/i, intent: 'find_dsa' },
+  { pattern: /\bdsa\b/i, intent: 'find_dsa' },
+  { pattern: /\bwhat\b.*\b(share|sharing)\b.*\bwith\b/i, intent: 'find_dsa' },
+  { pattern: /\b(do|does|is)\b.*\b(data share|data sharing|agreement)\b.*\bexist/i, intent: 'find_dsa' },
+  { pattern: /\bagreement(s)?\b.*(with|between|for)/i, intent: 'find_dsa' },
+  { pattern: /\b(list|show|all)\b.*\b(data shar|agreement)/i, intent: 'list_dsas' },
+  { pattern: /\bwhat\b.*agreements?\b.*(does|do|has|have)\b/i, intent: 'list_dsas' },
 ];
 
 function detectIntent(query: string): { intent: QueryIntent; confidence: number } {
@@ -178,6 +201,20 @@ function extractAgentType(query: string): AgentType | undefined {
   if (q.includes('data') || q.includes('sync')) return 'data';
   if (q.includes('intelligence') || q.includes('ai') || q.includes('analysis')) return 'intelligence';
   if (q.includes('support') || q.includes('ministerial') || q.includes('correspondence')) return 'support';
+  return undefined;
+}
+
+/**
+ * Extract data sharing category from query
+ */
+function extractDataCategory(query: string): DataCategory | undefined {
+  const q = query.toLowerCase();
+  if (q.includes('income') || q.includes('tax') || q.includes('earning')) return 'income';
+  if (q.includes('identity') || q.includes('biometric') || q.includes('passport')) return 'identity';
+  if (q.includes('health') || q.includes('medical') || q.includes('nhs')) return 'health';
+  if (q.includes('benefit') || q.includes('welfare') || q.includes('pension')) return 'benefits';
+  if (q.includes('address') || q.includes('residence') || q.includes('location')) return 'address';
+  if (q.includes('employment') || q.includes('job') || q.includes('work')) return 'employment';
   return undefined;
 }
 
@@ -645,6 +682,214 @@ function handleListAgents(query: string): QueryResult {
   };
 }
 
+function handleFindDSA(
+  query: string,
+  identity: UnifiedIdentity,
+  auditContext?: AuditContext
+): QueryResult {
+  // Check RBAC permission first
+  const rbacCheck = checkRolePermission(identity.role, 'query', 'dsa');
+  if (!rbacCheck.allowed) {
+    logBatchAccessDecision(identity, 'query', 'dsa', 0, 1, auditContext);
+    return {
+      intent: 'find_dsa',
+      confidence: 1.0,
+      response: `You do not have permission to query data sharing agreements. ${rbacCheck.reason}`,
+      entities: [],
+      suggestions: [
+        'What services are available',
+        'Show me integration patterns',
+      ],
+    };
+  }
+
+  const dept = extractDepartment(query);
+  const category = extractDataCategory(query);
+  const keywords = extractTopicKeywords(query);
+
+  // Start with all DSAs, then apply access control
+  let candidateDSAs = dataSharingAgreements;
+
+  if (dept) {
+    candidateDSAs = getAgreementsByDepartment(dept.id);
+  }
+
+  if (category) {
+    candidateDSAs = candidateDSAs.filter(dsa => dsa.category === category);
+  }
+
+  // Apply access control filtering
+  const filterResult = filterDSAList(candidateDSAs, identity);
+  const accessibleDSAs = filterResult.dsas;
+
+  // Log the access decision
+  logBatchAccessDecision(
+    identity,
+    'query',
+    'dsa',
+    filterResult.summary.allowed,
+    filterResult.summary.denied,
+    auditContext
+  );
+
+  // Score by keyword matches
+  const scored = accessibleDSAs.map(dsa => {
+    let score = 0;
+    const searchText = `${dsa.name} ${dsa.description} ${dsa.dataElements.join(' ')} ${dsa.tags.join(' ')}`.toLowerCase();
+    keywords.forEach(k => {
+      if (searchText.includes(k)) score += 1;
+    });
+    return { dsa, score };
+  });
+
+  const sorted = scored.sort((a, b) => b.score - a.score);
+  const top = sorted[0]?.dsa;
+
+  if (!top) {
+    const accessNote = filterResult.summary.denied > 0
+      ? ` (${filterResult.summary.denied} agreements not visible based on your access level)`
+      : '';
+    return {
+      intent: 'find_dsa',
+      confidence: 0.5,
+      response: `No data sharing agreements found matching those criteria${accessNote}. Try "list all data sharing agreements" to see what's available.`,
+      entities: [],
+      suggestions: [
+        'List all data sharing agreements',
+        'Show income data agreements',
+        'What agreements does DCS have',
+      ],
+    };
+  }
+
+  const provider = getDepartmentById(top.providingDepartmentId);
+  const consumer = getDepartmentById(top.consumingDepartmentId);
+
+  // Build response with historical access indicator
+  const historicalNote = top.isHistoricalAccess ? ' _(Historical - this agreement has expired)_' : '';
+
+  const response = `*${top.name}*${historicalNote}\n\n` +
+    `${top.description}\n\n` +
+    `• *Category:* ${top.category}\n` +
+    `• *Status:* ${top.status}\n` +
+    `• *Provider:* ${provider?.acronym ?? top.providingDepartmentId}\n` +
+    `• *Consumer:* ${consumer?.acronym ?? top.consumingDepartmentId}\n` +
+    `• *Data elements:* ${top.dataElements.length}\n` +
+    `• *Reference:* ${top.reference}`;
+
+  return {
+    intent: 'find_dsa',
+    confidence: 0.8,
+    response,
+    entities: [{
+      type: 'data-sharing-agreement',
+      id: top.id,
+      name: top.name,
+      url: `/data-sharing-agreements/${top.id}`,
+    }],
+    suggestions: [
+      `Show all ${top.category} data agreements`,
+      `What data does ${consumer?.acronym ?? top.consumingDepartmentId} receive`,
+    ],
+  };
+}
+
+function handleListDSAs(
+  query: string,
+  identity: UnifiedIdentity,
+  auditContext?: AuditContext
+): QueryResult {
+  // Check RBAC permission first
+  const rbacCheck = checkRolePermission(identity.role, 'list', 'dsa');
+  if (!rbacCheck.allowed) {
+    logBatchAccessDecision(identity, 'list', 'dsa', 0, 1, auditContext);
+    return {
+      intent: 'list_dsas',
+      confidence: 1.0,
+      response: `You do not have permission to list data sharing agreements. ${rbacCheck.reason}`,
+      entities: [],
+      suggestions: [
+        'What services are available',
+        'Show me integration patterns',
+      ],
+    };
+  }
+
+  const dept = extractDepartment(query);
+  const category = extractDataCategory(query);
+
+  let candidateResults = dataSharingAgreements;
+  let description = 'All data sharing agreements';
+
+  if (dept) {
+    candidateResults = getAgreementsByDepartment(dept.id);
+    description = `Data sharing agreements involving ${dept.name}`;
+  }
+
+  if (category) {
+    candidateResults = candidateResults.filter(dsa => dsa.category === category);
+    description += ` (${category})`;
+  }
+
+  // Apply access control filtering
+  const filterResult = filterDSAList(candidateResults, identity);
+  const results = filterResult.dsas;
+
+  // Log the access decision
+  logBatchAccessDecision(
+    identity,
+    'list',
+    'dsa',
+    filterResult.summary.allowed,
+    filterResult.summary.denied,
+    auditContext
+  );
+
+  if (results.length === 0) {
+    const accessNote = filterResult.summary.denied > 0
+      ? ` (${filterResult.summary.denied} agreements not visible based on your access level)`
+      : '';
+    return {
+      intent: 'list_dsas',
+      confidence: 0.7,
+      response: `No data sharing agreements found matching those criteria${accessNote}.`,
+      entities: [],
+    };
+  }
+
+  const displayed = results.slice(0, 5);
+  const accessNote = filterResult.summary.denied > 0
+    ? `\n_Note: ${filterResult.summary.denied} additional agreements are not visible based on your access level._\n`
+    : '';
+  const historicalNote = filterResult.summary.historical > 0
+    ? `\n_${filterResult.summary.historical} agreements shown are historical (expired)._\n`
+    : '';
+
+  let response = `*${description}* (${results.length} visible)\n${accessNote}${historicalNote}\n`;
+  response += displayed.map(dsa => {
+    const provider = getDepartmentById(dsa.providingDepartmentId);
+    const consumer = getDepartmentById(dsa.consumingDepartmentId);
+    const historicalMarker = dsa.isHistoricalAccess ? ' 📜' : '';
+    return `• *${dsa.name}* (${provider?.acronym}→${consumer?.acronym}) - ${dsa.status}${historicalMarker}`;
+  }).join('\n');
+
+  if (results.length > 5) {
+    response += `\n\n_...and ${results.length - 5} more. See full listing._`;
+  }
+
+  return {
+    intent: 'list_dsas',
+    confidence: 0.85,
+    response,
+    entities: displayed.map(dsa => ({
+      type: 'data-sharing-agreement' as const,
+      id: dsa.id,
+      name: dsa.name,
+      url: `/data-sharing-agreements/${dsa.id}`,
+    })),
+  };
+}
+
 function handleGeneralSearch(query: string): QueryResult {
   const results = searchAll(query);
 
@@ -679,6 +924,7 @@ function handleGeneralSearch(query: string): QueryResult {
            r.type === 'pattern' ? `/patterns/${r.id}` :
            r.type === 'team' ? `/teams/${r.id}` :
            r.type === 'agent' ? `/agents/${r.id}` :
+           r.type === 'data-sharing-agreement' ? `/data-sharing-agreements/${r.id}` :
            `/people/${r.id}`,
     })),
   };
@@ -698,9 +944,21 @@ function handleGeneralSearch(query: string): QueryResult {
  * @example
  * processQuery("show me authentication patterns")
  * // Returns patterns related to authentication
+ *
+ * @example
+ * // With access control
+ * const identity = createIdentityFromAdminUser(user);
+ * processQuery("show data sharing agreements", identity)
+ * // Returns only DSAs the user has access to
  */
-export function processQuery(query: string): QueryResult {
-  const { intent, confidence } = detectIntent(query);
+export function processQuery(
+  query: string,
+  identity?: UnifiedIdentity,
+  auditContext?: AuditContext
+): QueryResult {
+  // Default to public viewer if no identity provided
+  const effectiveIdentity = identity ?? createPublicIdentity();
+  const { intent } = detectIntent(query);
 
   switch (intent) {
     case 'find_person':
@@ -713,10 +971,14 @@ export function processQuery(query: string): QueryResult {
       return handleFindPattern(query);
     case 'find_agent':
       return handleFindAgent(query);
+    case 'find_dsa':
+      return handleFindDSA(query, effectiveIdentity, auditContext);
     case 'list_services':
       return handleListServices(query);
     case 'list_agents':
       return handleListAgents(query);
+    case 'list_dsas':
+      return handleListDSAs(query, effectiveIdentity, auditContext);
     case 'list_consumers':
     case 'list_dependencies':
       // TODO: Implement these

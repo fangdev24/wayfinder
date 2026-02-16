@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState, useCallback, useMemo } from 'react';
 import * as d3 from 'd3';
 import { useRouter } from 'next/navigation';
-import { getGraphData, getServiceById, getPatternById, getPolicyById, getAgentById, type GraphNode, type GraphEdge } from '@/lib/data';
+import { getGraphData, getServiceById, getPatternById, getPolicyById, getAgentById, getDataSharingAgreementById, type GraphNode, type GraphEdge } from '@/lib/data';
 import { useGraphFilters } from './GraphContext';
 
 // Department colours matching the legend
@@ -17,6 +17,7 @@ const DEPARTMENT_COLOURS: Record<string, string> = {
   patterns: '#505a5f',
   policies: '#6f72af',
   agents: '#0b0c0c',
+  agreements: '#ffdd00',
 };
 
 interface SimNode extends d3.SimulationNodeDatum, GraphNode {
@@ -76,6 +77,8 @@ export function GraphCanvas() {
       if (node.type === 'pattern' && !filters.showPatterns) return false;
       if (node.type === 'policy' && !filters.showPolicies) return false;
       if (node.type === 'agent' && !filters.showAgents) return false;
+      // DSAs are always shown when enabled (they span departments like policies)
+      if (node.type === 'data-sharing-agreement') return true;
       return true;
     };
 
@@ -87,6 +90,8 @@ export function GraphCanvas() {
         // Patterns and policies don't have departments, show them when type is enabled
         if (node.type === 'pattern') return true;
         if (node.type === 'policy') return true;
+        // DSAs span departments - show if either provider or consumer matches
+        if (node.type === 'data-sharing-agreement') return true;
         if (node.department !== filters.selectedDepartment) return false;
       }
 
@@ -259,7 +264,7 @@ export function GraphCanvas() {
       .attr('d', 'M0,-5L10,0L0,5');
 
     // Calculate cluster centers for each department (arranged in a circle)
-    const groups = ['dso', 'dcs', 'rts', 'bia', 'vla', 'nhds', 'patterns', 'policies', 'agents'];
+    const groups = ['dso', 'dcs', 'rts', 'bia', 'vla', 'nhds', 'patterns', 'policies', 'agents', 'agreements'];
     const clusterCenters: Record<string, { x: number; y: number }> = {};
     groups.forEach((group, i) => {
       const angle = (i / groups.length) * 2 * Math.PI - Math.PI / 2;
@@ -378,6 +383,20 @@ export function GraphCanvas() {
           .attr('fill', color)
           .attr('stroke', '#0b0c0c')
           .attr('stroke-width', 1);
+      } else if (d.type === 'data-sharing-agreement') {
+        // 5-pointed star for data sharing agreements (highly visible)
+        const outerRadius = 12;
+        const innerRadius = 5;
+        const starPoints = d3.range(10).map(i => {
+          const radius = i % 2 === 0 ? outerRadius : innerRadius;
+          const angle = (i * 36 - 90) * Math.PI / 180;
+          return [Math.cos(angle) * radius, Math.sin(angle) * radius];
+        });
+        el.append('polygon')
+          .attr('points', starPoints.map(p => p.join(',')).join(' '))
+          .attr('fill', color)
+          .attr('stroke', '#0b0c0c')
+          .attr('stroke-width', 1);
       } else {
         // Circle for services
         el.append('circle')
@@ -478,6 +497,8 @@ export function GraphCanvas() {
           router.push(`/policies/${d.id}`);
         } else if (d.type === 'agent') {
           router.push(`/agents/${d.id}`);
+        } else if (d.type === 'data-sharing-agreement') {
+          router.push(`/data-sharing-agreements/${d.id}`);
         }
       });
 
@@ -542,6 +563,8 @@ export function GraphCanvas() {
       return getPolicyById(selectedNode.id);
     } else if (selectedNode.type === 'agent') {
       return getAgentById(selectedNode.id);
+    } else if (selectedNode.type === 'data-sharing-agreement') {
+      return getDataSharingAgreementById(selectedNode.id);
     }
     return null;
   };
@@ -611,7 +634,11 @@ export function GraphCanvas() {
           <strong>{tooltipData.node.label}</strong>
           <br />
           <span style={{ color: '#505a5f' }}>
-            {tooltipData.node.type === 'service' ? 'Service' : tooltipData.node.type === 'pattern' ? 'Pattern' : tooltipData.node.type === 'policy' ? 'Policy' : 'Agent'}
+            {tooltipData.node.type === 'service' ? 'Service' :
+             tooltipData.node.type === 'pattern' ? 'Pattern' :
+             tooltipData.node.type === 'policy' ? 'Policy' :
+             tooltipData.node.type === 'agent' ? 'Agent' :
+             tooltipData.node.type === 'data-sharing-agreement' ? 'Data Sharing Agreement' : 'Entity'}
             {tooltipData.node.department && ` • ${tooltipData.node.department.toUpperCase()}`}
           </span>
           <br />
@@ -684,6 +711,8 @@ export function GraphCanvas() {
                 router.push(`/policies/${selectedNode.id}`);
               } else if (selectedNode.type === 'agent') {
                 router.push(`/agents/${selectedNode.id}`);
+              } else if (selectedNode.type === 'data-sharing-agreement') {
+                router.push(`/data-sharing-agreements/${selectedNode.id}`);
               }
             }}
           >

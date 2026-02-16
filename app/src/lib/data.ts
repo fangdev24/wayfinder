@@ -19,6 +19,7 @@ import {
   relationships,
   people,
   agents,
+  dataSharingAgreements,
   stats,
   solidConfig,
   // Service helpers
@@ -48,6 +49,15 @@ import {
   getAgentsConsumingService as _getAgentsConsumingService,
   getAgentsByStatus as _getAgentsByStatus,
   searchAgents as _searchAgents,
+  // Data Sharing Agreement helpers
+  getDataSharingAgreementById as _getDataSharingAgreementById,
+  getAgreementsByDepartment as _getAgreementsByDepartment,
+  getAgreementsByProvider as _getAgreementsByProvider,
+  getAgreementsByConsumer as _getAgreementsByConsumer,
+  getAgreementsForService as _getAgreementsForService,
+  getAgreementsByCategory as _getAgreementsByCategory,
+  getAgreementsByStatus as _getAgreementsByStatus,
+  searchAgreements as _searchAgreements,
 } from '@/data-source';
 
 // Re-export data collections
@@ -61,6 +71,7 @@ export {
   relationships,
   people,
   agents,
+  dataSharingAgreements,
   stats,
   solidConfig,
 };
@@ -94,6 +105,10 @@ export type {
   AgentPermission,
   PermissionCondition,
   AgentAuditEntry,
+  // Data Sharing Agreement types
+  DataSharingAgreement,
+  DataCategory,
+  AgreementStatus,
 } from '@/data-source/schema';
 
 // ============================================================================
@@ -154,6 +169,19 @@ export const getAgentsByType = _getAgentsByType;
 export const getAgentsConsumingService = _getAgentsConsumingService;
 export const getAgentsByStatus = _getAgentsByStatus;
 export const searchAgents = _searchAgents;
+
+// ============================================================================
+// DATA SHARING AGREEMENT HELPERS
+// ============================================================================
+
+export const getDataSharingAgreementById = _getDataSharingAgreementById;
+export const getAgreementsByDepartment = _getAgreementsByDepartment;
+export const getAgreementsByProvider = _getAgreementsByProvider;
+export const getAgreementsByConsumer = _getAgreementsByConsumer;
+export const getAgreementsForService = _getAgreementsForService;
+export const getAgreementsByCategory = _getAgreementsByCategory;
+export const getAgreementsByStatus = _getAgreementsByStatus;
+export const searchAgreements = _searchAgreements;
 
 // ============================================================================
 // DEPARTMENT HELPERS
@@ -232,7 +260,7 @@ export function getCrossDepartmentRelationships() {
 // ============================================================================
 
 export interface SearchFilters {
-  type?: 'service' | 'pattern' | 'team' | 'person' | 'agent';
+  type?: 'service' | 'pattern' | 'team' | 'person' | 'agent' | 'data-sharing-agreement';
   department?: string;
   status?: string;
   category?: string;
@@ -241,7 +269,7 @@ export interface SearchFilters {
 export function searchAll(query: string, filters?: SearchFilters) {
   const q = query.toLowerCase();
   const results: Array<{
-    type: 'service' | 'pattern' | 'team' | 'person' | 'agent';
+    type: 'service' | 'pattern' | 'team' | 'person' | 'agent' | 'data-sharing-agreement';
     id: string;
     name: string;
     description: string;
@@ -358,6 +386,33 @@ export function searchAll(query: string, filters?: SearchFilters) {
       });
   }
 
+  // Search data sharing agreements
+  if (!filters?.type || filters.type === 'data-sharing-agreement') {
+    dataSharingAgreements
+      .filter((dsa) => {
+        if (filters?.department &&
+            dsa.providingDepartmentId !== filters.department &&
+            dsa.consumingDepartmentId !== filters.department) return false;
+        if (filters?.status && dsa.status !== filters.status) return false;
+        if (filters?.category && dsa.category !== filters.category) return false;
+        return (
+          dsa.name.toLowerCase().includes(q) ||
+          dsa.description.toLowerCase().includes(q) ||
+          dsa.dataElements.some((e) => e.toLowerCase().includes(q)) ||
+          dsa.tags.some((t) => t.toLowerCase().includes(q))
+        );
+      })
+      .forEach((dsa) => {
+        results.push({
+          type: 'data-sharing-agreement',
+          id: dsa.id,
+          name: dsa.name,
+          description: dsa.description,
+          department: dsa.providingDepartmentId,
+        });
+      });
+  }
+
   return results;
 }
 
@@ -367,7 +422,7 @@ export function searchAll(query: string, filters?: SearchFilters) {
 
 export interface GraphNode {
   id: string;
-  type: 'department' | 'team' | 'service' | 'pattern' | 'policy' | 'agent';
+  type: 'department' | 'team' | 'service' | 'pattern' | 'policy' | 'agent' | 'data-sharing-agreement';
   label: string;
   department?: string;
   group?: string;
@@ -424,6 +479,17 @@ export function getGraphData() {
       label: a.name,
       department: a.departmentId,
       group: 'agents',
+    });
+  });
+
+  // Add data sharing agreement nodes
+  dataSharingAgreements.forEach((dsa) => {
+    nodes.push({
+      id: dsa.id,
+      type: 'data-sharing-agreement',
+      label: dsa.name,
+      department: dsa.providingDepartmentId,
+      group: 'agreements',
     });
   });
 
@@ -509,6 +575,31 @@ export function getGraphData() {
           target: serviceId,
           type: 'agent-consumes',
           crossDepartment: service ? service.departmentId !== a.departmentId : false,
+        });
+      }
+    });
+  });
+
+  // Add data sharing agreement -> service edges
+  dataSharingAgreements.forEach((dsa) => {
+    dsa.relatedServices.forEach((serviceId) => {
+      if (nodeIds.has(serviceId)) {
+        edges.push({
+          source: dsa.id,
+          target: serviceId,
+          type: 'dsa-implements',
+          crossDepartment: true, // DSAs are inherently cross-department
+        });
+      }
+    });
+
+    // Add DSA -> policy edges
+    dsa.relatedPolicies.forEach((policyId) => {
+      if (nodeIds.has(policyId)) {
+        edges.push({
+          source: dsa.id,
+          target: policyId,
+          type: 'complies-with',
         });
       }
     });

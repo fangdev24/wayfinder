@@ -8,11 +8,13 @@ import {
   getPeopleByTeam,
   getPatternById,
   getAgentsConsumingService,
+  getAgreementsForService,
 } from '@/lib/data';
 import { ServiceCard } from '@/components/cards/ServiceCard';
 import { PersonCard } from '@/components/cards/PersonCard';
 import { PatternCard } from '@/components/cards/PatternCard';
 import { AgentCard } from '@/components/cards/AgentCard';
+import { DataSharingAgreementCard } from '@/components/cards/DataSharingAgreementCard';
 
 interface ServicePageProps {
   params: Promise<{ id: string }>;
@@ -48,6 +50,7 @@ export default async function ServicePage({ params }: ServicePageProps) {
     .map((pid) => getPatternById(pid))
     .filter(Boolean);
   const agentConsumers = getAgentsConsumingService(id);
+  const dataSharingAgreements = getAgreementsForService(id);
 
   return (
     <>
@@ -231,6 +234,25 @@ export default async function ServicePage({ params }: ServicePageProps) {
             <div className="wayfinder-grid wayfinder-grid--2-col">
               {agentConsumers.map((agent) => (
                 <AgentCard key={agent.id} agent={agent} compact />
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Data Sharing Agreements */}
+      {dataSharingAgreements.length > 0 && (
+        <div className="govuk-grid-row govuk-!-margin-top-8">
+          <div className="govuk-grid-column-full">
+            <h2 className="govuk-heading-m">
+              Data sharing agreements ({dataSharingAgreements.length})
+            </h2>
+            <p className="govuk-body govuk-!-margin-bottom-4">
+              Formal agreements that involve data from or to this service.
+            </p>
+            <div className="wayfinder-grid wayfinder-grid--2-col">
+              {dataSharingAgreements.map((agreement) => (
+                <DataSharingAgreementCard key={agreement.id} agreement={agreement} compact />
               ))}
             </div>
           </div>

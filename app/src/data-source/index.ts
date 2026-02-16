@@ -47,9 +47,10 @@ import { policies } from './policies';
 import { relationships } from './relationships';
 import { people } from './people';
 import { agents } from './agents';
+import { dataSharingAgreements } from './data-sharing-agreements';
 
 export const demoDataset: DemoDataset = {
-  version: '1.2.0',
+  version: '1.3.0',
   generated: '2026-03-15T10:00:00Z',
   description:
     'Fictional cross-government knowledge graph with Solid Pod integration demonstrating the Wayfinder concept',
@@ -61,6 +62,7 @@ export const demoDataset: DemoDataset = {
   relationships,
   people,
   agents,
+  dataSharingAgreements,
 };
 
 // Export individual collections
@@ -72,6 +74,7 @@ export { policies, getPolicyById, getPoliciesByDepartment, getPoliciesByCategory
 export { relationships } from './relationships';
 export { people, getPersonById, getPersonByWebId, getPeopleByTeam, getPeopleByDepartment, getMaintainersForService } from './people';
 export { agents, getAgentById, getAgentByWebId, getAgentsByDepartment, getAgentsByTeam, getAgentsByType, getAgentsConsumingService, getAgentsByStatus, searchAgents } from './agents';
+export { dataSharingAgreements, getDataSharingAgreementById, getAgreementsByDepartment, getAgreementsByProvider, getAgreementsByConsumer, getAgreementsForService, getAgreementsByCategory, getAgreementsByStatus, searchAgreements } from './data-sharing-agreements';
 
 // Export types
 export type * from './schema';
@@ -92,6 +95,7 @@ export const stats = {
   policies: policies.length,
   relationships: relationships.length,
   agents: agents.length,
+  dataSharingAgreements: dataSharingAgreements.length,
 
   servicesByType: {
     api: services.filter((s) => s.type === 'api').length,
@@ -147,6 +151,23 @@ export const stats = {
     bia: agents.filter((a) => a.departmentId === 'bia').length,
     vla: agents.filter((a) => a.departmentId === 'vla').length,
     nhds: agents.filter((a) => a.departmentId === 'nhds').length,
+  },
+
+  agreementsByCategory: {
+    income: dataSharingAgreements.filter((d) => d.category === 'income').length,
+    identity: dataSharingAgreements.filter((d) => d.category === 'identity').length,
+    health: dataSharingAgreements.filter((d) => d.category === 'health').length,
+    benefits: dataSharingAgreements.filter((d) => d.category === 'benefits').length,
+    address: dataSharingAgreements.filter((d) => d.category === 'address').length,
+    employment: dataSharingAgreements.filter((d) => d.category === 'employment').length,
+    other: dataSharingAgreements.filter((d) => d.category === 'other').length,
+  },
+
+  agreementsByStatus: {
+    active: dataSharingAgreements.filter((d) => d.status === 'active').length,
+    draft: dataSharingAgreements.filter((d) => d.status === 'draft').length,
+    expired: dataSharingAgreements.filter((d) => d.status === 'expired').length,
+    underReview: dataSharingAgreements.filter((d) => d.status === 'under-review').length,
   },
 };
 

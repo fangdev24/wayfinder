@@ -7,6 +7,7 @@ const navigation = [
   { href: '/', label: 'Search' },
   { href: '/graph', label: 'Knowledge Graph' },
   { href: '/services', label: 'Services' },
+  { href: '/data-sharing-agreements', label: 'Data Sharing' },
   { href: '/patterns', label: 'Patterns' },
   { href: '/compare', label: 'Compare' },
   { href: '/about', label: 'About' },

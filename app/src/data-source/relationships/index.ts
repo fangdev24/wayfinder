@@ -187,6 +187,51 @@ export const relationships: Relationship[] = [
   // ministerial-triage-dcs consumes: email-gateway, document-classification-api, bedrock-claude, staff-directory
   { id: 'rel-540', sourceId: 'ministerial-triage-dcs', sourceType: 'agent', targetId: 'gov-notify', targetType: 'service', relationshipType: 'consumes', metadata: { purpose: 'Email access via Notify' } },
   { id: 'rel-541', sourceId: 'ministerial-triage-dcs', sourceType: 'agent', targetId: 'case-management', targetType: 'service', relationshipType: 'consumes', metadata: { purpose: 'Correspondence routing' } },
+
+  // =========================================================================
+  // DATA SHARING AGREEMENT -> SERVICE (data-provider/data-consumer)
+  // These show which services implement data sharing agreements
+  // =========================================================================
+
+  // DCS-RTS Income Verification Agreement
+  { id: 'rel-600', sourceId: 'dsa-dcs-rts-income-2024', sourceType: 'data-sharing-agreement', targetId: 'income-verification-api', targetType: 'service', relationshipType: 'data-provider', metadata: { purpose: 'RTS provides income data', crossDepartment: true } },
+  { id: 'rel-601', sourceId: 'dsa-dcs-rts-income-2024', sourceType: 'data-sharing-agreement', targetId: 'eligibility-api', targetType: 'service', relationshipType: 'data-consumer', metadata: { purpose: 'DCS consumes income data for eligibility', crossDepartment: true } },
+
+  // BIA-DCS Identity Verification Agreement
+  { id: 'rel-610', sourceId: 'dsa-bia-dcs-identity-2024', sourceType: 'data-sharing-agreement', targetId: 'identity-verification-api', targetType: 'service', relationshipType: 'data-provider', metadata: { purpose: 'BIA provides identity verification', crossDepartment: true } },
+  { id: 'rel-611', sourceId: 'dsa-bia-dcs-identity-2024', sourceType: 'data-sharing-agreement', targetId: 'citizen-portal', targetType: 'service', relationshipType: 'data-consumer', metadata: { purpose: 'DCS citizen portal consumes identity data', crossDepartment: true } },
+
+  // NHDS-DCS Health Data Agreement
+  { id: 'rel-620', sourceId: 'dsa-nhds-dcs-health-2024', sourceType: 'data-sharing-agreement', targetId: 'summary-care-record-api', targetType: 'service', relationshipType: 'data-provider', metadata: { purpose: 'NHDS provides health summaries', crossDepartment: true } },
+  { id: 'rel-621', sourceId: 'dsa-nhds-dcs-health-2024', sourceType: 'data-sharing-agreement', targetId: 'case-management', targetType: 'service', relationshipType: 'data-consumer', metadata: { purpose: 'DCS case management uses health data', crossDepartment: true } },
+
+  // BIA-VLA Identity Agreement
+  { id: 'rel-630', sourceId: 'dsa-bia-vla-identity-2023', sourceType: 'data-sharing-agreement', targetId: 'identity-verification-api', targetType: 'service', relationshipType: 'data-provider', metadata: { purpose: 'BIA provides identity checks', crossDepartment: true } },
+  { id: 'rel-631', sourceId: 'dsa-bia-vla-identity-2023', sourceType: 'data-sharing-agreement', targetId: 'document-check-service', targetType: 'service', relationshipType: 'data-provider', metadata: { purpose: 'BIA provides document verification', crossDepartment: true } },
+
+  // RTS-DCS Employment Status Agreement
+  { id: 'rel-640', sourceId: 'dsa-rts-dcs-employment-2024', sourceType: 'data-sharing-agreement', targetId: 'rti-processor', targetType: 'service', relationshipType: 'data-provider', metadata: { purpose: 'RTS provides real-time employment info', crossDepartment: true } },
+  { id: 'rel-641', sourceId: 'dsa-rts-dcs-employment-2024', sourceType: 'data-sharing-agreement', targetId: 'employer-api', targetType: 'service', relationshipType: 'data-provider', metadata: { purpose: 'RTS provides employer data', crossDepartment: true } },
+  { id: 'rel-642', sourceId: 'dsa-rts-dcs-employment-2024', sourceType: 'data-sharing-agreement', targetId: 'eligibility-api', targetType: 'service', relationshipType: 'data-consumer', metadata: { purpose: 'DCS uses employment data for eligibility', crossDepartment: true } },
+
+  // DSO Standards Agreement
+  { id: 'rel-650', sourceId: 'dsa-dso-all-standards-2023', sourceType: 'data-sharing-agreement', targetId: 'api-gateway', targetType: 'service', relationshipType: 'data-provider', metadata: { purpose: 'DSO provides API standards' } },
+
+  // =========================================================================
+  // DATA SHARING AGREEMENT -> POLICY (complies-with)
+  // These show which policies govern data sharing agreements
+  // =========================================================================
+
+  { id: 'rel-700', sourceId: 'dsa-dcs-rts-income-2024', sourceType: 'data-sharing-agreement', targetId: 'data-sharing-framework', targetType: 'policy', relationshipType: 'complies-with' },
+  { id: 'rel-701', sourceId: 'dsa-dcs-rts-income-2024', sourceType: 'data-sharing-agreement', targetId: 'welfare-data-reform', targetType: 'policy', relationshipType: 'complies-with' },
+  { id: 'rel-710', sourceId: 'dsa-bia-dcs-identity-2024', sourceType: 'data-sharing-agreement', targetId: 'digital-identity-programme', targetType: 'policy', relationshipType: 'complies-with' },
+  { id: 'rel-711', sourceId: 'dsa-bia-dcs-identity-2024', sourceType: 'data-sharing-agreement', targetId: 'secure-by-design', targetType: 'policy', relationshipType: 'complies-with' },
+  { id: 'rel-720', sourceId: 'dsa-nhds-dcs-health-2024', sourceType: 'data-sharing-agreement', targetId: 'data-sharing-framework', targetType: 'policy', relationshipType: 'complies-with' },
+  { id: 'rel-730', sourceId: 'dsa-bia-vla-identity-2023', sourceType: 'data-sharing-agreement', targetId: 'digital-identity-programme', targetType: 'policy', relationshipType: 'complies-with' },
+  { id: 'rel-740', sourceId: 'dsa-rts-dcs-employment-2024', sourceType: 'data-sharing-agreement', targetId: 'welfare-data-reform', targetType: 'policy', relationshipType: 'complies-with' },
+  { id: 'rel-741', sourceId: 'dsa-rts-dcs-employment-2024', sourceType: 'data-sharing-agreement', targetId: 'data-sharing-framework', targetType: 'policy', relationshipType: 'complies-with' },
+  { id: 'rel-750', sourceId: 'dsa-dso-all-standards-2023', sourceType: 'data-sharing-agreement', targetId: 'secure-by-design', targetType: 'policy', relationshipType: 'complies-with' },
+  { id: 'rel-751', sourceId: 'dsa-dso-all-standards-2023', sourceType: 'data-sharing-agreement', targetId: 'digital-identity-programme', targetType: 'policy', relationshipType: 'complies-with' },
 ];
 
 export default relationships;

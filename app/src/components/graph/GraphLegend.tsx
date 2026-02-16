@@ -106,6 +106,23 @@ export function GraphLegend() {
           </svg>
           Agent
         </li>
+        <li className="govuk-!-margin-bottom-1">
+          <svg
+            width="14"
+            height="14"
+            viewBox="-7 -7 14 14"
+            style={{ marginRight: '8px', verticalAlign: 'middle' }}
+            aria-hidden="true"
+          >
+            <polygon
+              points="0,-6 1.4,-1.9 5.7,-1.9 2.1,0.7 3.5,4.9 0,2.3 -3.5,4.9 -2.1,0.7 -5.7,-1.9 -1.4,-1.9"
+              fill="#ffdd00"
+              stroke="#0b0c0c"
+              strokeWidth="0.5"
+            />
+          </svg>
+          Data Sharing Agreement
+        </li>
       </ul>
 
       {/* Edge Types */}
